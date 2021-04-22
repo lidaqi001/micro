@@ -22,6 +22,7 @@ func (g *GreeterServiceHandler) Hello(ctx context.Context, req *proto.HelloReque
 	return nil
 }
 
+// 每秒钟QPS
 const QPS = 1
 
 func main() {
@@ -40,6 +41,7 @@ func main() {
 		micro.Server(grpc.NewServer()),
 		micro.Name("Greeter"),
 		micro.Registry(registry),
+		// 基于ratelimit 限流
 		micro.WrapHandler(ratelimiter.NewHandlerWrapper(bucket, false)),
 	)
 
