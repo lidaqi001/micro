@@ -29,7 +29,9 @@ func service() {
 	registry := consul.NewRegistry()
 
 	// 初始化追踪器
-	t, io, err := trace.NewTracer("laracom.demo.cli", os.Getenv("MICRO_TRACE_SERVER"))
+	//t, io, err := trace.NewTracer("laracom.demo.cli", os.Getenv("MICRO_TRACE_SERVER"))
+	traceServer := "192.168.1.145:6831"
+	t, io, err := trace.NewTracer("cli.trace", traceServer)
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -7,15 +7,14 @@ import (
 	_ "github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
+	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/metadata"
 	ratelimit "github.com/juju/ratelimit"
-	"log"
-	"os"
-	proto "sxx-go-micro/proto"
-	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
-	"sxx-go-micro/trace"
 	"github.com/opentracing/opentracing-go"
+	"log"
+	proto "sxx-go-micro/proto"
+	"sxx-go-micro/trace"
 )
 
 type DemoServiceHandler struct{}
@@ -52,6 +51,12 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 const QPS = 1
 
 func main() {
+	//log.Println(os.Getenv("MICRO_TRACE_SERVER"))
+
+	server()
+}
+
+func server() {
 
 	// 将服务注册到consul
 	registry := consul.NewRegistry()
@@ -62,7 +67,10 @@ func main() {
 	bucket := ratelimit.NewBucketWithRate(float64(QPS), int64(QPS))
 
 	// 初始化全局服务追踪
-	t, io, err := trace.NewTracer("service.trace", os.Getenv("MICRO_TRACE_SERVER"))
+	//t, io, err := trace.NewTracer("service.trace", os.Getenv("MICRO_TRACE_SERVER"))
+	traceServer := "192.168.1.145:6831"
+	t, io, err := trace.NewTracer("service.trace", traceServer)
+
 	if err != nil {
 		log.Fatal(err)
 	}
