@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"context"
@@ -9,27 +9,10 @@ import (
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/juju/ratelimit"
-	"github.com/opentracing/opentracing-go"
 	"log"
 	"sxx-go-micro/Common/config"
-	"sxx-go-micro/Common/service"
-	proto "sxx-go-micro/proto"
-	"sxx-go-micro/server-trace/handler"
 	"sxx-go-micro/trace"
 )
-
-// 每秒钟QPS
-const QPS = 1
-
-func main() {
-	service.CreateService(
-		context.Background(),
-		config.SERVICE_SING,
-		func(service micro.Service) {
-			// 注册处理函数
-			proto.RegisterDemoServiceHandler(service.Server(), new(handler.DemoServiceHandler))
-		})
-}
 
 func CreateService(ctx context.Context, serviceName string, registerService func(service micro.Service)) {
 
@@ -49,7 +32,7 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		参数传递：
 			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
 	*/
-	_, io, err := trace.NewTracer(serviceName, config.TRACE_PORT, "")
+	t, io, err := trace.NewTracer(serviceName, config.TRACE_PORT, "")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,11 +44,14 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		micro.Server(grpc.NewServer()),
 		micro.Name(serviceName),
 		micro.Registry(registry),
+
 		// 基于ratelimit 限流
 		micro.WrapHandler(ratelimiter.NewHandlerWrapper(bucket, false)),
 		// 基于 jaeger 采集追踪数据
-		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
-		micro.Context(ctx),
+		micro.WrapHandler(
+			//traceplugin.NewHandlerWrapper(opentracing.GlobalTracer()),
+			traceplugin.NewHandlerWrapper(t),
+		),
 	)
 
 	// 初始化，会解析命令行参数
