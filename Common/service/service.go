@@ -33,15 +33,11 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		参数传递：
 			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
 	*/
-	log.Printf("opentracing.GlobalTracer()1:::%v", opentracing.GlobalTracer())
-	_, _, err := jaeger.NewTracer(serviceName, config.TRACE_PORT, "")
+	_, io, err := jaeger.NewTracer(serviceName, config.TRACE_PORT, "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	//defer io.Close()
-	log.Printf("opentracing.GlobalTracer()2:::%v", opentracing.GlobalTracer())
-	//opentracing.SetGlobalTracer(t)
-	//log.Printf("opentracing.GlobalTracer()3:::%v", opentracing.GlobalTracer())
+	defer io.Close()
 
 	// 创建新的服务
 	service := micro.NewService(
@@ -49,13 +45,10 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		micro.Server(grpc.NewServer()),
 		micro.Name(serviceName),
 		micro.Registry(registry),
-
 		// 基于ratelimit 限流
 		micro.WrapHandler(ratelimiter.NewHandlerWrapper(bucket, false)),
 		// 基于 jaeger 采集追踪数据
-		micro.WrapHandler(
-			traceplugin.NewHandlerWrapper(opentracing.GlobalTracer()),
-			//traceplugin.NewHandlerWrapper(t),
+		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer()),
 		),
 	)
 
