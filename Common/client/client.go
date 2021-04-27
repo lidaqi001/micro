@@ -10,50 +10,31 @@ import (
 	"github.com/opentracing/opentracing-go"
 	"log"
 	"sxx-go-micro/Common/config"
-	"sxx-go-micro/Common/wrapper/breaker/hystrix"
-	"sxx-go-micro/trace"
+	"sxx-go-micro/plugins/wrapper/breaker/hystrix"
+	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
 func CreateClient(
 	clientName string,
 	callUserFunc func(service micro.Service, ctx context.Context) (interface{}, interface{}, error),
 	ctx context.Context,
-	sp opentracing.Span) (interface{}, error) {
+	sp opentracing.Span,
+	hystrixService []string) (interface{}, error) {
 
-	// 这一行封装出去有问题
-	//t, sp, parentContext := traceGetConfig(clientName, ctx, sp)
+	// 当ctx || sp 为空时
+	if ctx == nil || sp == nil {
+		sp, ctx = jaeger.GetTraceClientCtxAndSpan()
+	}
 
 	// 设置trace server地址
-	/*
-		1/ 从外部设置env		PS：traceIp := os.Getenv("MICRO_TRACE_SERVER")
-		2/ 代码中设置env		PS：traceIp := os.Setenv("MICRO_TRACE_IP", "192.168.1.146")
-
-		参数传递：
-			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
-	*/
-	t, io, err := trace.NewTracer(clientName, config.TRACE_PORT, "")
+	t, io, err := jaeger.NewTracer(clientName, config.TRACE_PORT, "")
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer io.Close()
 
-	// 获取父级上下文
-	// 如果没有传入上下文和span，则创建
-	var parentContext context.Context
-	if ctx == nil || sp == nil {
-		// 创建空的上下文, 生成追踪 span
-		// 注入 opentracing textmap 到空的上下文用于追踪
-		sp, parentContext = trace.GetTraceClientCtx()
-	} else {
-		parentContext = opentracing.ContextWithSpan(ctx, sp)
-	}
-
-
-
-
-
 	// hystrix 配置
-	hystrix.Configure([]string{"sing.DemoService.SayHello"})
+	hystrix.Configure(hystrixService)
 
 	// 创建一个新的服务
 	service := micro.NewService(
@@ -67,78 +48,24 @@ func CreateClient(
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(t)),
 	)
+
 	// 初始化
 	service.Init()
 
-	// 执行客户端调用
-	req, resp, err := callUserFunc(service, parentContext)
-
-	// 设置 trace tag
-	//traceSetTag(sp, req, resp, err)
-	sp.SetTag("req", req)
-
-	if err != nil {
-		// 记录错误
-		sp.SetTag("err", err)
-		//log.Println("服务调用失败：%v", err)
-		//log.Fatalf("服务调用失败：%v", err)
-		log2.Warnf("服务调用失败：%v", err)
-		return resp, err
-	}
-
-	// 记录响应
-	sp.SetTag("resp", resp)
-
-	return resp, err
-}
-
-func traceSetTag(sp opentracing.Span, args ...interface{}) {
+	// 执行客户端闭包，调用相应服务
+	req, resp, err := callUserFunc(service, ctx)
 
 	// 记录请求
-	sp.SetTag("req", args[0])
+	sp.SetTag("req", req)
+	defer func() {
+		if err != nil {
+			// 记录错误
+			sp.SetTag("err", err)
+			log2.Warnf("服务调用失败：%v", err)
+		}
+		// 记录响应
+		sp.SetTag("resp", resp)
+	}()
 
-	err := args[2].(error)
-	if err != nil {
-		// 记录错误
-		sp.SetTag("err", err)
-		log.Println("服务调用失败：%v", err)
-		//log.Fatalf("服务调用失败：%v", err)
-		return
-	}
-
-	// 记录响应
-	sp.SetTag("resp", args[1])
-}
-
-func traceGetConfig(
-	clientName string,
-	ctx context.Context,
-	sp opentracing.Span) (opentracing.Tracer, opentracing.Span, context.Context) {
-
-	// 设置trace server地址
-	/*
-		1/ 从外部设置env		PS：traceIp := os.Getenv("MICRO_TRACE_SERVER")
-		2/ 代码中设置env		PS：traceIp := os.Setenv("MICRO_TRACE_IP", "192.168.1.146")
-
-		参数传递：
-			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
-	*/
-	t, io, err := trace.NewTracer(clientName, config.TRACE_PORT, "")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer io.Close()
-
-	// 获取父级上下文
-	// 如果没有传入上下文和span，则创建
-	var parentContext context.Context
-	if ctx == nil || sp == nil {
-		// 创建空的上下文, 生成追踪 span
-		// 注入 opentracing textmap 到空的上下文用于追踪
-		sp, parentContext = trace.GetTraceClientCtx()
-	} else {
-		parentContext = opentracing.ContextWithSpan(ctx, sp)
-	}
-
-	return t, sp, parentContext
+	return resp, err
 }

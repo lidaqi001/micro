@@ -18,9 +18,10 @@ type clientWrapper struct {
 func (c *clientWrapper) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
 	return hystrix.Do(req.Service()+"."+req.Endpoint(), func() error {
 		// 初始化retrier，每隔100ms重试一次，总共重试3次
-		r := retrier.New(retrier.ConstantBackoff(2, 100*time.Millisecond), nil)
+		r := retrier.New(retrier.ConstantBackoff(1, 100*time.Millisecond), nil)
 		// retrier 工作模式和 hystrix 类似，在 Run 方法中将待执行的业务逻辑封装到匿名函数传入即可
 		err := r.Run(func() error {
+			log.Println("重试")
 			return c.Client.Call(ctx, req, rsp, opts...)
 		})
 		return err
@@ -41,7 +42,7 @@ func NewClientWrapper() client.Wrapper {
 func Configure(names []string) {
 	// Hystrix 有默认的参数配置，这里可以针对某些 API 进行自定义配置
 	config := hystrix.CommandConfig{
-		Timeout:               1000,
+		Timeout:               2000,
 		MaxConcurrentRequests: 100,
 		ErrorPercentThreshold: 25,
 	}
@@ -52,6 +53,7 @@ func Configure(names []string) {
 	hystrix.Configure(configs)
 
 	// 结合 Hystrix Dashboard 将服务状态信息可视化
+	// 不使用可视化工具，可以注释掉
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
 	go http.ListenAndServe(net.JoinHostPort("", "88"), hystrixStreamHandler)

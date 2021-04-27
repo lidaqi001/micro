@@ -2,97 +2,103 @@ package main
 
 import (
 	"context"
-	"fmt"
-	"github.com/asim/go-micro/plugins/client/grpc/v3"
-	"github.com/asim/go-micro/plugins/registry/consul/v3"
 	"github.com/asim/go-micro/v3"
 	"log"
-	"os"
-	"os/signal"
-	proto "sxx-go-micro/proto"
-	"sxx-go-micro/Common/wrapper/breaker/hystrix"
-	"syscall"
-	"time"
+	"reflect"
+	"sxx-go-micro/Common/client"
+	"sxx-go-micro/Common/config"
+	"sxx-go-micro/proto"
 )
 
 func main() {
-	serviceCirculation()
-}
 
-func service() {
+	rsp, _ := client.CreateClient(
+		"client.1",
+		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
+			cli := proto.NewDemoService(config.SERVICE_SING, service.Client())
+			req := &proto.DemoRequest{Name: "学院君"}
+			resp, err := cli.SayHello(ctx, req)
+			return req, resp, err
+		}, nil, nil,
+		[]string{
+			config.SERVICE_SING + ".DemoService.SayHello",
+		})
 
-	// 客户端从consul中发现服务
-	registry := consul.NewRegistry()
-
-	// 创建一个新的服务
-	service := micro.NewService(
-		// 使用grpc协议
-		micro.Client(grpc.NewClient()),
-		micro.Name("Greeter.Client"),
-		micro.Registry(registry),
-	)
-	// 初始化
-	service.Init()
-
-	// 创建 Greeter 客户端
-	greeter := proto.NewGreeterService("Greeter", service.Client())
-
-	// 远程调用 Greeter 服务的 Hello 方法
-	rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{Name: "学院君"})
-	if err != nil {
-		fmt.Println(err)
+	log.Printf("%v", reflect.TypeOf(rsp))
+	log.Printf("%v", rsp)
+	if val := reflect.ValueOf(rsp); val.IsNil() {
+		log.Println("返回值为空")
+		return
 	}
 
-	// Print response
-	fmt.Println(rsp.Greeting)
-}
-
-func serviceCirculation() {
-	// 将服务注册到consul
-	registry := consul.NewRegistry()
-
-	// hystrix 配置
-	hystrix.Configure([]string{"Greeter.test"})
-
-	// 创建一个新的服务
-	service := micro.NewService(
-		//micro.Transport(grpc.NewTransport()),
-		micro.Client(grpc.NewClient()),
-		micro.Name("Greeter.Client"),
-		micro.Registry(registry),
-		// 使用 hystrix
-		micro.WrapClient(hystrix.NewClientWrapper()),
-	)
-	// 初始化
-	service.Init()
-
-	// 创建 Greeter 客户端
-	greeter := proto.NewGreeterService("Greeter", service.Client())
-
-	// 模拟常驻内存
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, os.Kill, syscall.SIGQUIT)
-	go func() {
-		for s := range c {
-			switch s {
-			case os.Interrupt, os.Kill, syscall.SIGQUIT:
-				fmt.Println("退出客户端")
-				os.Exit(0)
-			default:
-				fmt.Println("程序执行中...")
-			}
-		}
-	}()
-
-	// 远程调用 Greeter 服务的 Hello 方法
-	for {
-		rsp, err := greeter.Hello(context.TODO(), &proto.HelloRequest{Name: "学院君"})
-		if err != nil {
-			log.Fatalf("服务调用失败：%v", err)
-			return
-		}
-		// Print response
-		log.Println(rsp.Greeting)
-		time.Sleep(3 * time.Second)
+	resp := rsp.(*proto.DemoResponse)
+	if resp.Text == "" {
+		log.Println("返回值resp.Text等于空")
+		return
 	}
+
+	log.Println("返回值：" + resp.Text)
+
 }
+
+//func main() {
+//	clientName := "client.1"
+//	// 设置trace server地址
+//	t, io, err := trace.NewTracer(clientName, config.TRACE_PORT, "")
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//	defer io.Close()
+//
+//	// 创建空的上下文, 生成追踪 span
+//	sp, ctx := opentracing.StartSpanFromContext(context.Background(), "call Client")
+//
+//	md, ok := metadata.FromContext(ctx)
+//	if !ok {
+//		md = make(map[string]string)
+//	}
+//	defer sp.Finish()
+//
+//	// 注入 opentracing textmap 到空的上下文用于追踪
+//	opentracing.GlobalTracer().Inject(sp.Context(), opentracing.TextMap, opentracing.TextMapCarrier(md))
+//	ctx = opentracing.ContextWithSpan(ctx, sp)
+//	ctx = metadata.NewContext(ctx, md)
+//
+//	// hystrix 配置
+//	//hystrix.Configure(hystrixService)
+//	//hystrixGo.DefaultTimeout=5
+//
+//	// 创建一个新的服务
+//	service := micro.NewService(
+//		micro.Name(clientName),
+//		// 使用grpc协议
+//		micro.Client(grpc.NewClient()),
+//		// 客户端从consul中发现服务
+//		micro.Registry(consul.NewRegistry()),
+//		// 使用 hystrix 实现服务治理
+//		//micro.WrapClient(hystrix.NewClientWrapper()),
+//		// 链路追踪客户端
+//		micro.WrapClient(traceplugin.NewClientWrapper(t)),
+//	)
+//	// 初始化
+//	service.Init()
+//
+//	// 执行客户端调用
+//	cli := proto.NewDemoService(config.SERVICE_SING, service.Client())
+//	req := &proto.DemoRequest{Name: "学院君"}
+//	resp, err := cli.SayHello(ctx, req)
+//
+//	// 记录请求
+//	sp.SetTag("req", req)
+//
+//	if err != nil {
+//		// 记录错误
+//		sp.SetTag("err", err)
+//		log2.Warnf("服务调用失败：%v", err)
+//	}
+//
+//	// 记录响应
+//	sp.SetTag("resp", resp)
+//
+//	return
+//}

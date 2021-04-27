@@ -4,8 +4,9 @@ import (
 	"context"
 	"log"
 	"math/rand"
+	"sxx-go-micro/Common/config"
+	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 	"sxx-go-micro/proto"
-	"sxx-go-micro/trace"
 	"time"
 )
 
@@ -22,24 +23,15 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 	// 记录请求
 	// 记录响应
 	// 在函数返回 stop span 之前，统计函数执行时间
-	//defer trace.GetTraceServiceSpan(ctx, req, rsp)
-	sp := trace.GetTraceServiceSpan(ctx, req, rsp)
-	// 记录请求
-	sp.SetTag("req", req)
-	defer func() {
-		// 记录响应
-		sp.SetTag("resp", rsp)
-		// 在函数返回 stop span 之前，统计函数执行时间
-		sp.Finish()
-	}()
+	defer jaeger.GetTraceServiceSpan(&ctx, req, rsp)
 
+	// 随机休眠时间，模仿实际情况中的慢请求
 	num := rand.Intn(3)
 	time.Sleep(time.Duration(num) * time.Second)
 
-	rsp.Text = "server.2::你好, " + req.Name
+	rsp.Text = config.SERVICE_SPEAK + "::你好, " + req.Name
 	log.Println("request")
-	log.Println("server-trace2")
+	log.Println("speak")
 	log.Println(rsp.Text)
 	return nil
-
 }

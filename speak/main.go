@@ -6,7 +6,7 @@ import (
 	"sxx-go-micro/Common/config"
 	"sxx-go-micro/Common/service"
 	proto "sxx-go-micro/proto"
-	"sxx-go-micro/server-trace2/handler"
+	"sxx-go-micro/speak/handler"
 )
 
 func main() {

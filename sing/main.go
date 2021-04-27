@@ -13,9 +13,9 @@ import (
 	"log"
 	"sxx-go-micro/Common/config"
 	"sxx-go-micro/Common/service"
+	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 	proto "sxx-go-micro/proto"
-	"sxx-go-micro/server-trace/handler"
-	"sxx-go-micro/trace"
+	"sxx-go-micro/sing/handler"
 )
 
 // 每秒钟QPS
@@ -49,7 +49,7 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		参数传递：
 			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
 	*/
-	_, io, err := trace.NewTracer(serviceName, config.TRACE_PORT, "")
+	_, io, err := jaeger.NewTracer(serviceName, config.TRACE_PORT, "")
 	if err != nil {
 		log.Fatal(err)
 	}

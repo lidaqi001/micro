@@ -1,4 +1,4 @@
-package trace
+package jaeger
 
 import (
 	"context"
@@ -76,10 +76,10 @@ func empty(ip string) bool {
 	return len(ip) == 0
 }
 
-func GetTraceClientCtx() (opentracing.Span, context.Context) {
+func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 
 	// 创建空的上下文, 生成追踪 span
-	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call")
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call Service")
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		md = make(map[string]string)
@@ -94,24 +94,25 @@ func GetTraceClientCtx() (opentracing.Span, context.Context) {
 	return span, ctx
 }
 
-func GetTraceServiceSpan(ctx context.Context, req interface{}, rsp interface{}) opentracing.Span {
+func GetTraceServiceSpan(ctx *context.Context, req interface{}, rsp interface{}) opentracing.Span {
 	// 从微服务上下文中获取追踪信息
-	md, ok := metadata.FromContext(ctx)
+	md, ok := metadata.FromContext(*ctx)
 	if !ok {
 		md = make(map[string]string)
 	}
 	var sp opentracing.Span
 	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
 	// 创建新的 Span 并将其绑定到微服务上下文
-	sp = opentracing.StartSpan("SayHello", opentracing.ChildOf(wireContext))
+	//sp = opentracing.StartSpan("SayHello", opentracing.ChildOf(wireContext))
+	sp = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
 
 	// 记录请求
-	//sp.SetTag("req", req)
+	sp.SetTag("req", req)
 
 	// 同时记录响应
-	//if rsp != nil {
-	//	SpanSetResponse(sp, rsp)
-	//}
+	if rsp != nil {
+		SpanSetResponse(sp, rsp)
+	}
 
 	return sp
 }

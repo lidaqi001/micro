@@ -9,9 +9,10 @@ import (
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/juju/ratelimit"
+	"github.com/opentracing/opentracing-go"
 	"log"
 	"sxx-go-micro/Common/config"
-	"sxx-go-micro/trace"
+	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
 func CreateService(ctx context.Context, serviceName string, registerService func(service micro.Service)) {
@@ -32,11 +33,15 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		参数传递：
 			t, io, err := trace.NewTracer("service.trace", traceServer, traceIp)
 	*/
-	t, io, err := trace.NewTracer(serviceName, config.TRACE_PORT, "")
+	log.Printf("opentracing.GlobalTracer()1:::%v", opentracing.GlobalTracer())
+	_, _, err := jaeger.NewTracer(serviceName, config.TRACE_PORT, "")
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer io.Close()
+	//defer io.Close()
+	log.Printf("opentracing.GlobalTracer()2:::%v", opentracing.GlobalTracer())
+	//opentracing.SetGlobalTracer(t)
+	//log.Printf("opentracing.GlobalTracer()3:::%v", opentracing.GlobalTracer())
 
 	// 创建新的服务
 	service := micro.NewService(
@@ -49,8 +54,8 @@ func CreateService(ctx context.Context, serviceName string, registerService func
 		micro.WrapHandler(ratelimiter.NewHandlerWrapper(bucket, false)),
 		// 基于 jaeger 采集追踪数据
 		micro.WrapHandler(
-			//traceplugin.NewHandlerWrapper(opentracing.GlobalTracer()),
-			traceplugin.NewHandlerWrapper(t),
+			traceplugin.NewHandlerWrapper(opentracing.GlobalTracer()),
+			//traceplugin.NewHandlerWrapper(t),
 		),
 	)
 
