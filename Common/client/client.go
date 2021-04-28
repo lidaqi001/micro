@@ -6,7 +6,6 @@ import (
 	"github.com/asim/go-micro/plugins/registry/consul/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	log2 "github.com/asim/go-micro/v3/util/log"
 	"github.com/opentracing/opentracing-go"
 	"log"
 	"sxx-go-micro/Common/config"
@@ -20,11 +19,6 @@ func CreateClient(
 	ctx context.Context,
 	sp opentracing.Span,
 	hystrixService []string) (interface{}, error) {
-
-	// 当ctx || sp 为空时
-	if ctx == nil || sp == nil {
-		sp, ctx = jaeger.GetTraceClientCtxAndSpan()
-	}
 
 	// 设置trace server地址
 	t, io, err := jaeger.NewTracer(clientName, config.TRACE_PORT, "")
@@ -52,19 +46,36 @@ func CreateClient(
 	// 初始化
 	service.Init()
 
+	// 当ctx || sp 为空时
+	if ctx == nil || sp == nil {
+		sp, ctx = jaeger.GetTraceClientCtxAndSpan()
+	}
+
 	// 执行客户端闭包，调用相应服务
 	req, resp, err := callUserFunc(service, ctx)
 
+	//// 记录请求
+	//sp.SetTag("req", req)
+	//defer func() {
+	//	// 记录错误
+	//	if err != nil {
+	//		sp.SetTag("err", err)
+	//		log.Printf("服务调用失败：%v", err)
+	//	}
+	//	// 记录响应
+	//	sp.SetTag("resp", resp)
+	//	sp.Finish()
+	//}()
+
 	// 记录请求
-	sp.SetTag("req", req)
+	jaeger.SpanSetRequest(sp, req)
 	defer func() {
-		if err != nil {
-			// 记录错误
-			sp.SetTag("err", err)
-			log2.Warnf("服务调用失败：%v", err)
-		}
+		// 记录错误
 		// 记录响应
-		sp.SetTag("resp", resp)
+		jaeger.SpanSetResClient(sp, resp, err)
+		if err != nil {
+			log.Printf("服务调用失败：%v", err)
+		}
 	}()
 
 	return resp, err

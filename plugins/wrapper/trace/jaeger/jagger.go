@@ -79,7 +79,7 @@ func empty(ip string) bool {
 func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 
 	// 创建空的上下文, 生成追踪 span
-	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call Service")
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call services")
 	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		md = make(map[string]string)
@@ -94,32 +94,60 @@ func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 	return span, ctx
 }
 
-func GetTraceServiceSpan(ctx *context.Context, req interface{}, rsp interface{}) opentracing.Span {
+func GetTraceServiceSpan(ctx *context.Context, req interface{}, rsp interface{}, err error) opentracing.Span {
 	// 从微服务上下文中获取追踪信息
 	md, ok := metadata.FromContext(*ctx)
 	if !ok {
 		md = make(map[string]string)
 	}
-	var sp opentracing.Span
+	var span opentracing.Span
 	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
 	// 创建新的 Span 并将其绑定到微服务上下文
-	//sp = opentracing.StartSpan("SayHello", opentracing.ChildOf(wireContext))
-	sp = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
+	span = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
+
+	//defer span.Finish()
 
 	// 记录请求
-	sp.SetTag("req", req)
-
-	// 同时记录响应
+	SpanSetRequest(span, req)
 	if rsp != nil {
-		SpanSetResponse(sp, rsp)
+		// 同时记录响应
+		SpanSetResService(span, rsp, err)
 	}
 
-	return sp
+	return span
 }
 
-func SpanSetResponse(sp opentracing.Span, rsp interface{}) {
-	// 记录响应
-	sp.SetTag("resp", rsp)
-	// 在函数返回 stop span 之前，统计函数执行时间
+func SpanSetRequest(sp opentracing.Span, req interface{}) {
+	sp.SetTag("req", req)
+}
+
+type SetResponse struct {
+	Sp          opentracing.Span
+	Resp        interface{}
+	Err         error
+	ErrCallback func(err error)
+	End         int
+}
+
+//  service for use
+func SpanSetResService(sp opentracing.Span, resp interface{}, err error) {
+
+	SpanSetResponse(sp, resp, err, 1)
+}
+
+//  client for use
+func SpanSetResClient(sp opentracing.Span, resp interface{}, err error) {
+
+	SpanSetResponse(sp, resp, err, nil)
+}
+
+func SpanSetResponse(sp opentracing.Span, resp interface{}, err error, finish interface{}) {
+	sp.SetTag("resp", resp)
+	if err != nil {
+		sp.SetTag("err", err)
+	}
+	if finish == nil {
+		return
+	}
 	sp.Finish()
 }

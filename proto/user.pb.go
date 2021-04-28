@@ -1,5 +1,5 @@
 //*
-// Demo Service
+// Demo services
 //
 // 示例微服务
 

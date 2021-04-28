@@ -13,9 +13,9 @@ import (
 	"log"
 	"sxx-go-micro/Common/config"
 	"sxx-go-micro/Common/service"
+	"sxx-go-micro/services/sing/handler"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 	proto "sxx-go-micro/proto"
-	"sxx-go-micro/sing/handler"
 )
 
 // 每秒钟QPS
