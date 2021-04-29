@@ -1,17 +1,15 @@
 package main
 
 import (
-	"context"
 	"github.com/asim/go-micro/v3"
 	"sxx-go-micro/Common/config"
 	"sxx-go-micro/Common/service"
-	"sxx-go-micro/services/listen/handler"
 	proto "sxx-go-micro/proto"
+	"sxx-go-micro/services/listen/handler"
 )
 
 func main() {
-	service.CreateService(
-		context.Background(),
+	service.Create(
 		config.SERVICE_LISTEN,
 		func(service micro.Service) {
 			// 注册处理函数

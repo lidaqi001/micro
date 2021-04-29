@@ -13,7 +13,15 @@ import (
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
-func CreateClient(
+// 此结构体用以改造Create函数，非必须参数改用Params结构体存储
+// 未完成
+type Params struct {
+	Ctx            context.Context
+	Sp             opentracing.Span
+	HystrixService string
+}
+
+func Create(
 	clientName string,
 	callUserFunc func(service micro.Service, ctx context.Context) (interface{}, interface{}, error),
 	ctx context.Context,
@@ -27,14 +35,15 @@ func CreateClient(
 	}
 	defer io.Close()
 
-	// hystrix 配置
+	// hystrix 配置（重试、降级、熔断）
 	hystrix.Configure(hystrixService)
 
 	// 创建一个新的服务
 	service := micro.NewService(
-		micro.Name(clientName),
 		// 使用grpc协议
 		micro.Client(grpc.NewClient()),
+		// 客户端名称
+		micro.Name(clientName),
 		// 客户端从consul中发现服务
 		micro.Registry(consul.NewRegistry()),
 		// 使用 hystrix 实现服务治理
@@ -53,19 +62,6 @@ func CreateClient(
 
 	// 执行客户端闭包，调用相应服务
 	req, resp, err := callUserFunc(service, ctx)
-
-	//// 记录请求
-	//sp.SetTag("req", req)
-	//defer func() {
-	//	// 记录错误
-	//	if err != nil {
-	//		sp.SetTag("err", err)
-	//		log.Printf("服务调用失败：%v", err)
-	//	}
-	//	// 记录响应
-	//	sp.SetTag("resp", resp)
-	//	sp.Finish()
-	//}()
 
 	// 记录请求
 	jaeger.SpanSetRequest(sp, req)

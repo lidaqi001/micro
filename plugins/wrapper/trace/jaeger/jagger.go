@@ -14,6 +14,12 @@ import (
 
 const DEFAULT_TRACE_IP = "192.168.1.146"
 
+type ServiceSpan struct {
+	Req interface{}
+	Rsp interface{}
+	Err error
+}
+
 // NewTracer 创建一个jaeger Tracer
 func NewTracer(servicename string, addr string, ip string) (opentracing.Tracer, io.Closer, error) {
 	traceIp := getTraceIp(ip)
@@ -43,9 +49,79 @@ func NewTracer(servicename string, addr string, ip string) (opentracing.Tracer, 
 		jaegercfg.Reporter(reporter),
 	)
 
-	opentracing.SetGlobalTracer(tracer)
-
 	return tracer, closer, err
+}
+
+func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
+
+	// 创建空的上下文, 生成追踪 span
+	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call services")
+	md, ok := metadata.FromContext(ctx)
+	if !ok {
+		md = make(map[string]string)
+	}
+	defer span.Finish()
+
+	// 注入 opentracing textmap 到空的上下文用于追踪
+	opentracing.GlobalTracer().Inject(span.Context(), opentracing.TextMap, opentracing.TextMapCarrier(md))
+	ctx = opentracing.ContextWithSpan(ctx, span)
+	ctx = metadata.NewContext(ctx, md)
+
+	return span, ctx
+}
+
+func GetTraceServiceSpan(ctx *context.Context, params ServiceSpan) opentracing.Span {
+	// 从微服务上下文中获取追踪信息
+	md, ok := metadata.FromContext(*ctx)
+	if !ok {
+		md = make(map[string]string)
+	}
+	var span opentracing.Span
+	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
+	// 创建新的 Span 并将其绑定到微服务上下文
+	span = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
+
+	//defer span.Finish()
+
+	if params.Req != nil {
+		// 记录请求
+		SpanSetRequest(span, params.Req)
+	}
+
+	if params.Rsp != nil && params.Err != nil {
+		// 同时记录响应和错误
+		SpanSetResService(span, params.Rsp, params.Err)
+
+	} else if params.Rsp != nil {
+		// 记录响应
+		SpanSetResService(span, params.Rsp, nil)
+	}
+
+	return span
+}
+
+func SpanSetRequest(sp opentracing.Span, req interface{}) {
+	sp.SetTag("req", req)
+}
+
+//  service for use
+func SpanSetResService(sp opentracing.Span, resp interface{}, err error) {
+	spanSetResponse(sp, resp, err, true)
+}
+
+//  client for use
+func SpanSetResClient(sp opentracing.Span, resp interface{}, err error) {
+	spanSetResponse(sp, resp, err, false)
+}
+
+func spanSetResponse(sp opentracing.Span, resp interface{}, err error, finish bool) {
+	sp.SetTag("resp", resp)
+	if err != nil {
+		sp.SetTag("err", err)
+	}
+	if finish == true {
+		sp.Finish()
+	}
 }
 
 func getTraceIp(ip string) string {
@@ -74,80 +150,4 @@ func getTraceIp(ip string) string {
 
 func empty(ip string) bool {
 	return len(ip) == 0
-}
-
-func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
-
-	// 创建空的上下文, 生成追踪 span
-	span, ctx := opentracing.StartSpanFromContext(context.Background(), "call services")
-	md, ok := metadata.FromContext(ctx)
-	if !ok {
-		md = make(map[string]string)
-	}
-	defer span.Finish()
-
-	// 注入 opentracing textmap 到空的上下文用于追踪
-	opentracing.GlobalTracer().Inject(span.Context(), opentracing.TextMap, opentracing.TextMapCarrier(md))
-	ctx = opentracing.ContextWithSpan(ctx, span)
-	ctx = metadata.NewContext(ctx, md)
-
-	return span, ctx
-}
-
-func GetTraceServiceSpan(ctx *context.Context, req interface{}, rsp interface{}, err error) opentracing.Span {
-	// 从微服务上下文中获取追踪信息
-	md, ok := metadata.FromContext(*ctx)
-	if !ok {
-		md = make(map[string]string)
-	}
-	var span opentracing.Span
-	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
-	// 创建新的 Span 并将其绑定到微服务上下文
-	span = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
-
-	//defer span.Finish()
-
-	// 记录请求
-	SpanSetRequest(span, req)
-	if rsp != nil {
-		// 同时记录响应
-		SpanSetResService(span, rsp, err)
-	}
-
-	return span
-}
-
-func SpanSetRequest(sp opentracing.Span, req interface{}) {
-	sp.SetTag("req", req)
-}
-
-type SetResponse struct {
-	Sp          opentracing.Span
-	Resp        interface{}
-	Err         error
-	ErrCallback func(err error)
-	End         int
-}
-
-//  service for use
-func SpanSetResService(sp opentracing.Span, resp interface{}, err error) {
-
-	SpanSetResponse(sp, resp, err, 1)
-}
-
-//  client for use
-func SpanSetResClient(sp opentracing.Span, resp interface{}, err error) {
-
-	SpanSetResponse(sp, resp, err, nil)
-}
-
-func SpanSetResponse(sp opentracing.Span, resp interface{}, err error, finish interface{}) {
-	sp.SetTag("resp", resp)
-	if err != nil {
-		sp.SetTag("err", err)
-	}
-	if finish == nil {
-		return
-	}
-	sp.Finish()
 }

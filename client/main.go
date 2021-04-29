@@ -12,11 +12,11 @@ import (
 
 func main() {
 
-	rsp, _ := client.CreateClient(
+	rsp, _ := client.Create(
 		"client.1",
 		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
 			cli := proto.NewDemoService(config.SERVICE_SING, service.Client())
-			req := &proto.DemoRequest{Name: "学院君"}
+			req := &proto.DemoRequest{Name: "李琪"}
 			resp, err := cli.SayHello(ctx, req)
 			return req, resp, err
 		}, nil, nil,
@@ -37,6 +37,5 @@ func main() {
 		return
 	}
 
-	log.Println("返回值：" + resp.Text)
 
 }

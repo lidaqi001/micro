@@ -22,14 +22,13 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 	// 从微服务上下文中获取追踪信息
 	// 创建新的 Span 并将其绑定到微服务上下文
 	// 记录请求
-	sp := jaeger.GetTraceServiceSpan(&ctx, req, nil, nil)
+	sp := jaeger.GetTraceServiceSpan(&ctx, jaeger.ServiceSpan{Req: req})
 
 	// 调用 speak
-	res, err := client.CreateClient(
+	res, err := client.Create(
 		"client.2",
 		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
 			cli := proto.NewDemoService(config.SERVICE_SPEAK, service.Client())
-			req := &proto.DemoRequest{Name: "学院君"}
 			resp, err := cli.SayHello(ctx, req)
 			return req, resp, err
 		}, ctx, sp,
@@ -38,11 +37,10 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 		})
 
 	// 调用 listen 服务
-	res2, err := client.CreateClient(
-		"client.2",
+	res2, err := client.Create(
+		"client.3",
 		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
 			cli := proto.NewDemoService(config.SERVICE_LISTEN, service.Client())
-			req := &proto.DemoRequest{Name: "学院君2"}
 			resp, err := cli.SayHello(ctx, req)
 			return req, resp, err
 		}, ctx, sp,
