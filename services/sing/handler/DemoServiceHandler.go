@@ -22,33 +22,38 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 	// 从微服务上下文中获取追踪信息
 	// 创建新的 Span 并将其绑定到微服务上下文
 	// 记录请求
-	sp := jaeger.GetTraceServiceSpan(&ctx, jaeger.ServiceSpan{Req: req})
+	sp := jaeger.GetTraceServiceSpan(&ctx)
 
-	// 调用 speak
-	res, err := client.Create(
-		"client.2",
-		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
-			cli := proto.NewDemoService(config.SERVICE_SPEAK, service.Client())
-			resp, err := cli.SayHello(ctx, req)
-			return req, resp, err
-		}, ctx, sp,
-		[]string{
+	// 调用 speak 服务
+	p1 := client.Params{
+		ClientName: "client.2",
+		HystrixService: []string{
 			config.SERVICE_SPEAK + ".DemoService.SayHello",
-		})
+		},
+		CallUserFunc: func(service micro.Service, ctx context.Context) (interface{}, error) {
+			cli := proto.NewDemoService(config.SERVICE_SPEAK, service.Client())
+			return cli.SayHello(ctx, req)
+		},
+		Ctx: ctx,
+		Sp:  sp,
+	}
+	res, err := client.Create(&p1)
+	log.Printf("sing：%v", res)
 
 	// 调用 listen 服务
-	res2, err := client.Create(
-		"client.3",
-		func(service micro.Service, ctx context.Context) (interface{}, interface{}, error) {
-			cli := proto.NewDemoService(config.SERVICE_LISTEN, service.Client())
-			resp, err := cli.SayHello(ctx, req)
-			return req, resp, err
-		}, ctx, sp,
-		[]string{
+	p2 := client.Params{
+		ClientName: "client.3",
+		HystrixService: []string{
 			config.SERVICE_LISTEN + ".DemoService.SayHello",
-		})
-
-	log.Printf("sing：%v", res)
+		},
+		CallUserFunc: func(service micro.Service, ctx context.Context) (interface{}, error) {
+			cli := proto.NewDemoService(config.SERVICE_LISTEN, service.Client())
+			return cli.SayHello(ctx, req)
+		},
+		Ctx: ctx,
+		Sp:  sp,
+	}
+	res2, err := client.Create(&p2)
 	log.Printf("listen：%v", res2)
 
 	text := ""
@@ -59,12 +64,7 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *proto.DemoReques
 		text += res2.(*proto.DemoResponse).Text
 	}
 	log.Println("拼接结果：" + text)
-
 	rsp.Text = text
 
-	// 记录响应
-	// 在函数返回 stop span 之前，统计函数执行时间
-	defer jaeger.SpanSetResService(sp, rsp, err)
-
-	return nil
+	return err
 }

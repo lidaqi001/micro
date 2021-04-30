@@ -13,3 +13,7 @@ func IsNil(value interface{}) bool {
 	}
 	return false
 }
+
+func Empty(ip string) bool {
+	return len(ip) == 0
+}

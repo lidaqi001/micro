@@ -14,12 +14,6 @@ import (
 
 const DEFAULT_TRACE_IP = "192.168.1.146"
 
-type ServiceSpan struct {
-	Req interface{}
-	Rsp interface{}
-	Err error
-}
-
 // NewTracer 创建一个jaeger Tracer
 func NewTracer(servicename string, addr string, ip string) (opentracing.Tracer, io.Closer, error) {
 	traceIp := getTraceIp(ip)
@@ -70,48 +64,37 @@ func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 	return span, ctx
 }
 
-func GetTraceServiceSpan(ctx *context.Context, params ServiceSpan) opentracing.Span {
+func GetTraceServiceSpan(ctx *context.Context) opentracing.Span {
 	// 从微服务上下文中获取追踪信息
 	md, ok := metadata.FromContext(*ctx)
 	if !ok {
 		md = make(map[string]string)
 	}
-	var span opentracing.Span
 	wireContext, _ := opentracing.GlobalTracer().Extract(opentracing.TextMap, opentracing.TextMapCarrier(md))
 	// 创建新的 Span 并将其绑定到微服务上下文
-	span = opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
-
-	//defer span.Finish()
-
-	if params.Req != nil {
-		// 记录请求
-		SpanSetRequest(span, params.Req)
-	}
-
-	if params.Rsp != nil && params.Err != nil {
-		// 同时记录响应和错误
-		SpanSetResService(span, params.Rsp, params.Err)
-
-	} else if params.Rsp != nil {
-		// 记录响应
-		SpanSetResService(span, params.Rsp, nil)
-	}
-
-	return span
+	return opentracing.StartSpan("call Server", opentracing.ChildOf(wireContext))
 }
 
-func SpanSetRequest(sp opentracing.Span, req interface{}) {
-	sp.SetTag("req", req)
+type span struct {
+	span opentracing.Span
 }
 
-//  service for use
-func SpanSetResService(sp opentracing.Span, resp interface{}, err error) {
-	spanSetResponse(sp, resp, err, true)
+type Span interface {
+	SetReq(req interface{})
+	SetRes(rsp interface{}, err error)
 }
 
-//  client for use
-func SpanSetResClient(sp opentracing.Span, resp interface{}, err error) {
-	spanSetResponse(sp, resp, err, false)
+func NewSpan(ctx context.Context) Span {
+	sp := GetTraceServiceSpan(&ctx)
+	return &span{span: sp}
+}
+
+func (s span) SetReq(req interface{}) {
+	s.span.SetTag("req", req)
+}
+
+func (s span) SetRes(rsp interface{}, err error) {
+	spanSetResponse(s.span, rsp, err, true)
 }
 
 func spanSetResponse(sp opentracing.Span, resp interface{}, err error, finish bool) {
