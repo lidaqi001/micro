@@ -11,30 +11,39 @@ import (
 )
 
 func main() {
+	//input := []string{"a", "b", "c"}
+	input := make(map[string]string)
+	input["a"] = "a"
+	input["b"] = "b"
+	input["c"] = "c"
 
 	params := client.Params{
 		ClientName: "client.1",
-		CallUserFunc: func(service micro.Service, ctx context.Context) (interface{}, error) {
-			cli := proto.NewDemoService(config.SERVICE_SING, service.Client())
+		Input:      input,
+		HystrixService: []string{
+			config.SERVICE_SING + ".DemoService.SayHello",
+		},
+		CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
+			// 业务代码处理
+			//i := input.(map[string]string)
+			//log.Printf("传参:::%v,%v", input, i["a"])
+
+			cli := proto.NewDemoService(config.SERVICE_SING, svc.Client())
 			req := &proto.DemoRequest{Name: "李琪"}
 			return cli.SayHello(ctx, req)
 		},
-		HystrixService: []string{
-			config.SERVICE_SING + ".DemoService.SayHello",
-		}}
-	rsp, _ := client.Create(&params)
+	}
+	rsp, _ := client.Create(params)
 
-	log.Printf("%v", reflect.TypeOf(rsp))
-	log.Printf("%v", rsp)
-	if val := reflect.ValueOf(rsp); val.IsNil() {
+	switch {
+	case reflect.ValueOf(rsp).IsNil():
 		log.Println("返回值为空")
 		return
-	}
-
-	resp := rsp.(*proto.DemoResponse)
-	if resp.Text == "" {
+		//fallthrough
+	case rsp.(*proto.DemoResponse).Text == "":
 		log.Println("返回值resp.Text等于空")
 		return
 	}
 
+	log.Printf("%v", rsp)
 }

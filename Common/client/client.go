@@ -22,12 +22,12 @@ type logWrapper struct {
 }
 
 func (l *logWrapper) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
-	log.Printf("[wrapper] client request service: %s method: %s\n", req.Service(), req.Endpoint())
+	//log.Printf("[wrapper] client request service: %s method: %s\n", req.Service(), req.Endpoint())
 
 	// 请求服务
 	err := l.Client.Call(ctx, req, rsp)
 
-	log.Printf("[wrapper] client rsp: %v\n", rsp)
+	//log.Printf("[wrapper] client rsp: %v\n", rsp)
 	return err
 }
 
@@ -40,14 +40,15 @@ func logWrap(c client.Client) client.Client {
 type Params struct {
 	ClientName     string
 	HystrixService []string
-	CallUserFunc   func(service micro.Service, ctx context.Context) (interface{}, error)
+	CallUserFunc   func(micro.Service, context.Context, interface{}) (interface{}, error)
 	Ctx            context.Context
 	Sp             opentracing.Span
+	Input          interface{}
 }
 
-func Create(params *Params) (interface{}, error) {
+func Create(params Params) (interface{}, error) {
 
-	err := verifyParams(*params)
+	err := verifyParams(params)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +92,7 @@ func Create(params *Params) (interface{}, error) {
 	service.Init()
 
 	// 执行客户端闭包，调用相应服务
-	return params.CallUserFunc(service, ctx)
+	return params.CallUserFunc(service, ctx, params.Input)
 }
 
 func verifyParams(params Params) error {

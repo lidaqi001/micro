@@ -64,9 +64,9 @@ func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 	return span, ctx
 }
 
-func GetTraceServiceSpan(ctx *context.Context) opentracing.Span {
+func GetTraceServiceSpan(ctx context.Context) opentracing.Span {
 	// 从微服务上下文中获取追踪信息
-	md, ok := metadata.FromContext(*ctx)
+	md, ok := metadata.FromContext(ctx)
 	if !ok {
 		md = make(map[string]string)
 	}
@@ -85,7 +85,7 @@ type Span interface {
 }
 
 func NewSpan(ctx context.Context) Span {
-	sp := GetTraceServiceSpan(&ctx)
+	sp := GetTraceServiceSpan(ctx)
 	return &span{span: sp}
 }
 
@@ -127,7 +127,7 @@ func getTraceIp(ip string) string {
 		panic("Trace server ip is null!")
 	}
 
-	log.Println("traceIp:::" + traceIp)
+	//log.Println("traceIp:::" + traceIp)
 	return traceIp
 }
 
