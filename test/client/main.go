@@ -9,8 +9,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	proto "sxx-go-micro/examples/proto"
 	"sxx-go-micro/plugins/wrapper/breaker/hystrix"
-	proto "sxx-go-micro/proto"
 	"syscall"
 	"time"
 )

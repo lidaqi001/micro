@@ -10,7 +10,7 @@ import (
 	"github.com/asim/go-micro/v3"
 	ratelimit "github.com/juju/ratelimit"
 	"log"
-	proto "sxx-go-micro/proto"
+	proto "sxx-go-micro/examples/proto"
 )
 
 type GreeterServiceHandler struct{}
