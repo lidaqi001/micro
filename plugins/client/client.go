@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/asim/go-micro/plugins/client/grpc/v3"
-	"github.com/asim/go-micro/plugins/registry/consul/v3"
+	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/client"
@@ -14,7 +14,7 @@ import (
 	"reflect"
 	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
-	"sxx-go-micro/plugins/wrapper/breaker/hystrix"
+	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 	"time"
 )
@@ -49,7 +49,13 @@ type Params struct {
 	Input          interface{}
 }
 
-func Create(params Params, c *gin.Context) (interface{}, error) {
+var DefaultHystrixService = []string{
+	config.SERVICE_SING + ".DemoService.SayHello",
+	config.SERVICE_SPEAK + ".DemoService.SayHello",
+	config.SERVICE_LISTEN + ".DemoService.SayHello",
+}
+
+func Create(params Params) (interface{}, error) {
 
 	err := verifyParams(params)
 	if err != nil {
@@ -59,6 +65,8 @@ func Create(params Params, c *gin.Context) (interface{}, error) {
 	if params.HystrixService != nil {
 		// hystrix 配置（重试、降级、熔断）
 		hystrix.Configure(params.HystrixService)
+	} else {
+		hystrix.Configure(DefaultHystrixService)
 	}
 
 	sp, ctx := params.Sp, params.Ctx
@@ -78,23 +86,30 @@ func Create(params Params, c *gin.Context) (interface{}, error) {
 	// 因为开启hystrix会导致重复请求（原因暂不明）
 	// 暂时使用客户端的
 	// client.DefaultRetries（重试），client.DefaultRequestTimeout（超时）设置代替
-	client.DefaultRetries = 0
-	client.DefaultRequestTimeout = time.Second * 2
+	//client.DefaultRetries = 0
+	//client.DefaultRequestTimeout = time.Second * 2
 
 	// 创建一个新的服务
 	service := micro.NewService(
 		// 使用grpc协议
-		micro.Client(grpc.NewClient()),
+		micro.Client(grpc.NewClient(
+			//client.PoolSize(1),
+			client.RequestTimeout(time.Second*5),
+			client.Retries(0),
+		)),
 		// 客户端名称
 		micro.Name(params.ClientName),
-		// 客户端从consul中发现服务
-		micro.Registry(consul.NewRegistry()),
 		// 使用 hystrix 实现服务治理
-		//micro.WrapClient(hystrix2.NewClientWrapper()),
+		micro.WrapClient(hystrix.NewClientWrapper()),
+		// 客户端从consul中发现服务
+		micro.Registry(etcd.NewRegistry()),
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(t)),
 		// wrap the client
 		micro.WrapClient(logWrap),
+	)
+	client.NewClient(
+		client.PoolSize(1),
 	)
 
 	retries := service.Client().Options().CallOptions.Retries
@@ -103,19 +118,20 @@ func Create(params Params, c *gin.Context) (interface{}, error) {
 	// 初始化
 	service.Init()
 
-	c.Set(params.ClientName, service)
-	c.Set(params.ClientName+"_ctx", &ctx)
+	if params.CallUserFunc != nil {
+		// 执行客户端闭包，调用相应服务
+		return params.CallUserFunc(service, ctx, params.Input)
+	}
 
-	// 执行客户端闭包，调用相应服务
-	return params.CallUserFunc(service, ctx, params.Input)
+	return nil, nil
 }
 
 func verifyParams(params Params) error {
 	switch {
 	case helper.Empty(params.ClientName):
-		return errors.New("clientName is empty!")
+		return errors.New("clientName can't be empty!")
 	case params.CallUserFunc == nil:
-		return errors.New("CallUserFunc is nil!")
+		return errors.New("CallUserFunc can't be nil!")
 	}
 	return nil
 }
@@ -134,7 +150,7 @@ func GetClient(op ClientOp) (micro.Service, context.Context, error) {
 	var service interface{}
 
 	if service, ok = c.Get(op.Name); !ok {
-		Create(op.Param, op.Ctx)
+		Create(op.Param)
 		if service, ok = c.Get("gin"); !ok {
 			return nil, nil, errors.New("client create failed!")
 		}
@@ -151,5 +167,5 @@ type cli struct {
 
 type Cli interface {
 	Create(Params)
-	GetClient(ClientOp)(micro.Service, context.Context, error)
+	GetClient(ClientOp) (micro.Service, context.Context, error)
 }

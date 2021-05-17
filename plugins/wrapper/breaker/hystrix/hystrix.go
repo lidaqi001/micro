@@ -15,14 +15,15 @@ type clientWrapper struct {
 	client.Client
 }
 
-func (c *clientWrapper) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
+func (c *clientWrapper) Call2(ctx context.Context, req client.Request, rsp interface{},
+	opts ...client.CallOption) error {
 	return hystrix.Do(req.Service()+"."+req.Endpoint(), func() error {
 		return c.Client.Call(ctx, req, rsp, opts...)
 	}, nil)
 }
 
-func (c *clientWrapper) Call2(ctx context.Context, req client.Request, rsp interface{},
-opts ...client.CallOption) error {
+func (c *clientWrapper) Call(ctx context.Context, req client.Request, rsp interface{},
+	opts ...client.CallOption) error {
 	return hystrix.Do(req.Service()+"."+req.Endpoint(), func() error {
 		// 初始化retrier，每隔100ms重试一次，总共重试1次
 		//r := retrier.New(retrier.ConstantBackoff(0, 100*time.Millisecond), nil)
@@ -32,6 +33,7 @@ opts ...client.CallOption) error {
 		//	return c.Client.Call(ctx, req, rsp, opts...)
 		//})
 		//return err
+		log.Println("call")
 		return c.Client.Call(ctx, req, rsp, opts...)
 	}, func(err error) error {
 		// 你可以在这里自定义更复杂的服务降级逻辑作为服务熔断的兜底

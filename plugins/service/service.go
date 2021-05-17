@@ -2,7 +2,7 @@ package service
 
 import (
 	"context"
-	"github.com/asim/go-micro/plugins/registry/consul/v3"
+	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
@@ -27,9 +27,6 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 	// PS：只在 service 声明
 	opentracing.SetGlobalTracer(t)
 
-	// 限流
-	bucket := ratelimit.NewBucketWithRate(float64(config.QPS), int64(config.QPS))
-
 	// 创建新的服务
 	service := micro.NewService(
 		// 使用grpc协议
@@ -37,9 +34,13 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 		// 服务名称
 		micro.Name(serviceName),
 		// 将服务注册到consul
-		micro.Registry(consul.NewRegistry()),
+		micro.Registry(etcd.NewRegistry()),
 		// 基于ratelimit 限流
-		micro.WrapHandler(ratelimiter.NewHandlerWrapper(bucket, false)),
+		micro.WrapHandler(
+			ratelimiter.NewHandlerWrapper(
+				ratelimit.NewBucketWithRate(float64(config.QPS), int64(config.QPS)),
+				false),
+		),
 		// 基于 jaeger 采集追踪数据
 		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 		// wrap the handler
