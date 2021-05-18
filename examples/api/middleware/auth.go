@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"log"
 	"strings"
-	"sxx-go-micro/test/api/jwt"
+	"sxx-go-micro/examples/api/jwt"
 )
 
 const (

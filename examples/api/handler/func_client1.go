@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"github.com/gin-gonic/gin"
-	"sxx-go-micro/common/config"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
 )

@@ -7,37 +7,16 @@ import (
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/client"
 	"github.com/gin-gonic/gin"
 	"github.com/opentracing/opentracing-go"
 	"log"
 	"reflect"
-	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
+	"sxx-go-micro/examples/config"
 	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
+	logWrap "sxx-go-micro/plugins/wrapper/client/log"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
-	"time"
 )
-
-// log wrapper logs every time a request is made
-type logWrapper struct {
-	client.Client
-}
-
-func (l *logWrapper) Call(ctx context.Context, req client.Request, rsp interface{}, opts ...client.CallOption) error {
-	//log.Printf("[wrapper] client request service: %s method: %s\n", req.Service(), req.Endpoint())
-
-	// 请求服务
-	err := l.Client.Call(ctx, req, rsp)
-
-	//log.Printf("[wrapper] client rsp: %v\n", rsp)
-	return err
-}
-
-// Implements client.Wrapper as logWrapper
-func logWrap(c client.Client) client.Client {
-	return &logWrapper{c}
-}
 
 // Create params struct
 type Params struct {
@@ -49,6 +28,7 @@ type Params struct {
 	Input          interface{}
 }
 
+// 应用自定义hystrix服务治理的服务列表
 var DefaultHystrixService = []string{
 	config.SERVICE_SING + ".DemoService.SayHello",
 	config.SERVICE_SPEAK + ".DemoService.SayHello",
@@ -83,47 +63,27 @@ func Create(params Params) (interface{}, error) {
 	}
 	defer io.Close()
 
-	// 因为开启hystrix会导致重复请求（原因暂不明）
-	// 暂时使用客户端的
-	// client.DefaultRetries（重试），client.DefaultRequestTimeout（超时）设置代替
-	//client.DefaultRetries = 0
-	//client.DefaultRequestTimeout = time.Second * 2
-
 	// 创建一个新的服务
 	service := micro.NewService(
 		// 使用grpc协议
-		micro.Client(grpc.NewClient(
-			//client.PoolSize(1),
-			client.RequestTimeout(time.Second*5),
-			client.Retries(0),
-		)),
+		micro.Client(grpc.NewClient()),
 		// 客户端名称
 		micro.Name(params.ClientName),
-		// 使用 hystrix 实现服务治理
-		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 客户端从consul中发现服务
 		micro.Registry(etcd.NewRegistry()),
+		// 使用 hystrix 实现服务治理
+		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(t)),
 		// wrap the client
-		micro.WrapClient(logWrap),
+		micro.WrapClient(logWrap.LogWrap),
 	)
-	client.NewClient(
-		client.PoolSize(1),
-	)
-
-	retries := service.Client().Options().CallOptions.Retries
-	log.Printf("重试次数：%v", retries)
 
 	// 初始化
 	service.Init()
 
-	if params.CallUserFunc != nil {
-		// 执行客户端闭包，调用相应服务
-		return params.CallUserFunc(service, ctx, params.Input)
-	}
-
-	return nil, nil
+	// 执行客户端闭包，调用相应服务
+	return params.CallUserFunc(service, ctx, params.Input)
 }
 
 func verifyParams(params Params) error {

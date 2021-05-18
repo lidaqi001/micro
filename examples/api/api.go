@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
-	"sxx-go-micro/test/api/handler"
-	"sxx-go-micro/test/api/jwt"
-	"sxx-go-micro/test/api/middleware"
+	"sxx-go-micro/examples/api/handler"
+	"sxx-go-micro/examples/api/jwt"
+	"sxx-go-micro/examples/api/middleware"
 )
 
 func main() {
@@ -27,7 +27,7 @@ func main() {
 			"message": "pong",
 		})
 	})
-	r.GET("/client1", h.Client1())
+
 	call := r.Group("/call")
 	{
 		call.GET("/client1", h.Client1())

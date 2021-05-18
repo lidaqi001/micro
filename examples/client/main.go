@@ -5,7 +5,7 @@ import (
 	"github.com/asim/go-micro/v3"
 	"log"
 	"reflect"
-	"sxx-go-micro/common/config"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
 )
@@ -20,9 +20,6 @@ func main() {
 	params := client.Params{
 		ClientName: "client.1",
 		Input:      input,
-		HystrixService: []string{
-			config.SERVICE_SING + ".DemoService.SayHello",
-		},
 		CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
 			// 业务代码处理
 			//i := input.(map[string]string)

@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"log"
-	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
@@ -24,28 +24,26 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *user.DemoRequest
 	// 记录请求
 	sp := jaeger.GetTraceServiceSpan(ctx)
 
-	// 调用 speak 服务
-	p1 := client.Params{
-		Ctx: ctx,
-		Sp:  sp,
+	common := client.Params{
+		Sp:         sp,
+		Ctx:        ctx,
 		ClientName: "client.2",
-		CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
-			cli := user.NewDemoService(config.SERVICE_SPEAK, svc.Client())
-			return cli.SayHello(ctx, req)
-		},
+	}
+
+	// 调用 speak 服务
+	p1 := common
+	p1.CallUserFunc = func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
+		cli := user.NewDemoService(config.SERVICE_SPEAK, svc.Client())
+		return cli.SayHello(ctx, req)
 	}
 	res, err := client.Create(p1)
 	log.Printf("speak：%v", res)
 
 	// 调用 listen 服务
-	p2 := client.Params{
-		Ctx: ctx,
-		Sp:  sp,
-		ClientName: "client.2",
-		CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
-			cli := user.NewDemoService(config.SERVICE_LISTEN, svc.Client())
-			return cli.SayHello(ctx, req)
-		},
+	p2 := common
+	p2.CallUserFunc = func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
+		cli := user.NewDemoService(config.SERVICE_LISTEN, svc.Client())
+		return cli.SayHello(ctx, req)
 	}
 	res2, err := client.Create(p2)
 	log.Printf("listen：%v", res2)

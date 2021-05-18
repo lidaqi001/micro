@@ -82,8 +82,6 @@ github.com/asim/go-micro/plugins/transport/grpc/v3 v3.0.0-20210202145831-0702501
 github.com/asim/go-micro/plugins/transport/grpc/v3 v3.0.0-20210202145831-070250155285/go.mod h1:FXWwzJ74gGEIY/gOdDHJqCQuago+tLSkcUPayf9daGM=
 github.com/asim/go-micro/plugins/transport/memory/v3 v3.0.0-20210202145831-070250155285 h1:Z+blHA3zrQzopsmTrxC4GmxnZR4Yc9X5C7EZf+puuXs=
 github.com/asim/go-micro/plugins/transport/memory/v3 v3.0.0-20210202145831-070250155285/go.mod h1://pLoUB+bzhDrNBfK42rN2CrJiVfUXfQA6CijCrWM/E=
-github.com/asim/go-micro/plugins/wrapper/breaker/hystrix/v3 v3.0.0-20210511075819-32cb1b435b9b h1:4W9K485NE+PvoPrndGOXR8S16RvE7cXMzE6I8B3RN74=
-github.com/asim/go-micro/plugins/wrapper/breaker/hystrix/v3 v3.0.0-20210511075819-32cb1b435b9b/go.mod h1:TF8gUd+aE+u9mQDdIjZ6fze9+puiSDFJgMvuyxYpayM=
 github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb h1:QNYksEFtDz6UabbqWMX2SW13OyIjTNtpTMutMI5sK44=
 github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb/go.mod h1:jgnZMDH8LaFHwDOzdJohlZNShyhM2AyodmQURZCyPsw=
 github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3 v3.0.0-20210416163442-a91d1f7a3dbb h1:kFnH2Qqh7cWpRJ7qrvN1wb/srhl198scdORQMOCwFiU=
@@ -147,6 +145,7 @@ github.com/docker/docker v1.4.2-0.20191101170500-ac7306503d23/go.mod h1:eEKB0N0r
 github.com/docker/go-connections v0.4.0/go.mod h1:Gbd7IOopHjR8Iph03tsViu4nIes5XhDvyHbTtUxmeec=
 github.com/docker/go-units v0.4.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+github.com/eapache/go-resiliency v1.1.0 h1:1NtRmCAqadE2FN4ZcN6g90TP3uk8cg9rn9eNK2197aU=
 github.com/eapache/go-resiliency v1.1.0/go.mod h1:kFI+JgMyC7bLPUVY133qvEBtVayf5mFgVsvEsIPBvNs=
 github.com/eapache/go-xerial-snappy v0.0.0-20180814174437-776d5712da21/go.mod h1:+020luEh2TKB4/GOp8oxxtq0Daoen/Cii55CzbTV6DU=
 github.com/eapache/queue v1.1.0/go.mod h1:6eCeP0CKFpHLu8blIFXhExK/dRa7WDZfr6jVFPTqq+I=

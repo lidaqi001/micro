@@ -9,11 +9,11 @@ require (
 	github.com/asim/go-micro/plugins/registry/consul/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
-	github.com/asim/go-micro/plugins/wrapper/breaker/hystrix/v3 v3.0.0-20210511075819-32cb1b435b9b
 	github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/v3 v3.5.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
+	github.com/eapache/go-resiliency v1.1.0
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
 	github.com/golang/protobuf v1.5.2

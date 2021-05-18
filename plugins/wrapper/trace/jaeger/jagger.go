@@ -9,6 +9,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"sxx-go-micro/examples/config"
 	"time"
 )
 
@@ -117,13 +118,13 @@ func getTraceIp(ip string) string {
 
 	if empty(traceIp) {
 		// 否则使用默认IP
-		traceIp = DEFAULT_TRACE_IP
+		traceIp = config.JAEGER_TRACE_IP
 	}
 
 	if empty(traceIp) {
 		log.Println("traceIp:::" + traceIp)
 		log.Println("ip:::MICRO_TRACE_IP:::" + os.Getenv("MICRO_TRACE_IP"))
-		log.Println("ip:::DEFAULT_TRACE_IP:::" + DEFAULT_TRACE_IP)
+		log.Println("ip:::DEFAULT_TRACE_IP:::" + config.JAEGER_TRACE_IP)
 		panic("Trace server ip is null!")
 	}
 
