@@ -15,7 +15,11 @@ func main() {
 	service.Create(
 		config.SERVICE_SING,
 		func(service micro.Service) {
+			// 获取 Broker 实例
+			pubSub := service.Server().Options().Broker
+			_ = pubSub.Connect()
+			defer pubSub.Disconnect()
 			// 注册处理函数
-			user.RegisterDemoServiceHandler(service.Server(), new(handler.DemoServiceHandler))
+			_ = user.RegisterDemoServiceHandler(service.Server(), &handler.DemoServiceHandler{PubSub: pubSub})
 		})
 }

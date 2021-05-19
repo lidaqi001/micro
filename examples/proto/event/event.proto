@@ -1,0 +1,16 @@
+/**
+ * Demo Service
+ *
+ * 示例微服务
+ */
+syntax = "proto3";
+option go_package = "./proto";
+
+/**
+ * 处理演示异步服务对象（event事件）
+ */
+message DemoEvent {
+  string city = 1;
+  int64 timestamp = 2;
+  int64 temperature = 3;
+}

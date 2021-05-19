@@ -9,7 +9,7 @@ import (
 	"sxx-go-micro/plugins/client"
 )
 
-func (h *handler) Client1() gin.HandlerFunc {
+func (h *handler) ClientAsync() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
@@ -19,9 +19,10 @@ func (h *handler) Client1() gin.HandlerFunc {
 		params := client.Params{
 			ClientName: "gin",
 			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
+
 				// 业务代码处理
 				cli := user.NewDemoService(config.SERVICE_SING, srv.Client())
-				return cli.SayHello(ctx, &user.DemoRequest{Name: "李琪"})
+				return cli.SayHelloByUserId(ctx, &user.UserRequest{Id: "李琪"})
 			},
 		}
 		rsp, err = client.Create(params)

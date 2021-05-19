@@ -31,6 +31,7 @@ func main() {
 	call := r.Group("/call")
 	{
 		call.GET("/client1", h.Client1())
+		call.GET("/async", h.ClientAsync())
 	}
 
 	r.Run() // 监听并在 0.0.0.0:8080 上启动服务

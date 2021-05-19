@@ -8,6 +8,7 @@ type handler struct {
 type Handler interface {
 	WelCome() gin.HandlerFunc
 	Client1() gin.HandlerFunc
+	ClientAsync() gin.HandlerFunc
 }
 
 func NewHandler() Handler {
