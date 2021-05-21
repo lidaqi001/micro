@@ -7,14 +7,10 @@ import (
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/gin-gonic/gin"
-	"github.com/opentracing/opentracing-go"
 	"log"
-	"reflect"
 	"sxx-go-micro/common/helper"
 	"sxx-go-micro/examples/config"
 	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
-	logWrap "sxx-go-micro/plugins/wrapper/client/log"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
@@ -24,7 +20,6 @@ type Params struct {
 	HystrixService []string
 	CallUserFunc   func(micro.Service, context.Context, interface{}) (interface{}, error)
 	Ctx            context.Context
-	Sp             opentracing.Span
 	Input          interface{}
 }
 
@@ -49,15 +44,15 @@ func Create(params Params) (interface{}, error) {
 		hystrix.Configure(DefaultHystrixService)
 	}
 
-	sp, ctx := params.Sp, params.Ctx
-	if sp == nil || ctx == nil {
+	ctx := params.Ctx
+	if ctx == nil {
 		// 当ctx || sp 为空时
 		// 初始化上下文和span
-		sp, ctx = jaeger.GetTraceClientCtxAndSpan()
+		_, ctx = jaeger.GetTraceClientCtxAndSpan()
 	}
 
 	// 设置trace server地址
-	t, io, err := jaeger.NewTracer(params.ClientName, config.TRACE_PORT, "")
+	t, io, err := jaeger.NewTracer(params.ClientName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -69,14 +64,14 @@ func Create(params Params) (interface{}, error) {
 		micro.Client(grpc.NewClient()),
 		// 客户端名称
 		micro.Name(params.ClientName),
-		// 客户端从consul中发现服务
+		// 服务发现
 		micro.Registry(etcd.NewRegistry()),
 		// 使用 hystrix 实现服务治理
 		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(t)),
 		// wrap the client
-		micro.WrapClient(logWrap.LogWrap),
+		//micro.WrapClient(logWrap.LogWrap),
 	)
 
 	// 初始化
@@ -94,38 +89,4 @@ func verifyParams(params Params) error {
 		return errors.New("CallUserFunc can't be nil!")
 	}
 	return nil
-}
-
-type ClientOp struct {
-	Ctx   *gin.Context
-	Name  string
-	Param Params
-}
-
-func GetClient(op ClientOp) (micro.Service, context.Context, error) {
-
-	c := op.Ctx
-
-	var ok bool
-	var service interface{}
-
-	if service, ok = c.Get(op.Name); !ok {
-		Create(op.Param)
-		if service, ok = c.Get("gin"); !ok {
-			return nil, nil, errors.New("client create failed!")
-		}
-		log.Printf("%v", reflect.TypeOf(service))
-	}
-
-	cc, _ := c.Get("gin_ctx")
-	return service.(micro.Service), cc.(context.Context), nil
-}
-
-type cli struct {
-	Ctx *gin.Context
-}
-
-type Cli interface {
-	Create(Params)
-	GetClient(ClientOp) (micro.Service, context.Context, error)
 }

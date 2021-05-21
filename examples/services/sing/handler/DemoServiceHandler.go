@@ -2,59 +2,25 @@ package handler
 
 import (
 	"context"
-	"encoding/json"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/broker"
 	"log"
 	"sxx-go-micro/common/helper"
 	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
 type DemoServiceHandler struct {
-	PubSub broker.Broker
 }
 
 func (s *DemoServiceHandler) SayHelloByUserId(ctx context.Context, req *user.UserRequest, rsp *user.DemoResponse) error {
-	log.Println("in SayHelloByUserId")
-	go func() {
-		_ = s.publishEvent(req)
-	}()
-	return nil
-}
-
-func (s *DemoServiceHandler) publishEvent(req *user.UserRequest) error {
-	log.Println("in publishEvent")
-	// JSON 编码
-	body, err := json.Marshal(req)
-	if err != nil {
-		return err
-	}
-	// 构建 broker 消息
-	msg := &broker.Message{
-		Header: map[string]string{
-			"email": req.Id,
-		},
-		Body: body,
-	}
-	// 通过 broker 发布消息到消息系统
-	if err := s.PubSub.Publish("singEvent", msg); err != nil {
-		log.Printf("[pub] failed: %v", err)
-	}
+	log.Println("hello~")
 	return nil
 }
 
 func (s *DemoServiceHandler) SayHello(ctx context.Context, req *user.DemoRequest, rsp *user.DemoResponse) error {
 
-	// 从微服务上下文中获取追踪信息
-	// 创建新的 Span 并将其绑定到微服务上下文
-	// 记录请求
-	sp := jaeger.GetTraceServiceSpan(ctx)
-
 	common := client.Params{
-		Sp:         sp,
 		Ctx:        ctx,
 		ClientName: "client.2",
 	}

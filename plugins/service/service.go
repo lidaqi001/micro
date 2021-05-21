@@ -17,7 +17,7 @@ import (
 func Create(serviceName string, registerService func(service micro.Service)) {
 
 	// 初始化全局服务追踪
-	t, io, err := jaeger.NewTracer(serviceName, config.TRACE_PORT, "")
+	t, io, err := jaeger.NewTracer(serviceName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,18 +32,26 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 		micro.Server(grpc.NewServer()),
 		// 服务名称
 		micro.Name(serviceName),
-		// 将服务注册到consul
+		// 服务注册
 		micro.Registry(etcd.NewRegistry()),
-		// 基于ratelimit 限流
+		// wrap handler
 		micro.WrapHandler(
+			// 基于ratelimit 限流
 			ratelimiter.NewHandlerWrapper(
 				ratelimit.NewBucketWithRate(float64(config.QPS), int64(config.QPS)),
-				false),
+				false,
+			),
+			// 基于 jaeger 采集追踪数据
+			// handler 调用服务-链路追踪
+			traceplugin.NewHandlerWrapper(t),
+			trace.SpanWrapper,
 		),
-		// 基于 jaeger 采集追踪数据
-		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
-		// 链路追踪中间件
-		micro.WrapHandler(trace.SpanWrapper),
+		// wrap subscriber
+		// subscriber 消息服务（异步事件/订阅）-链路追踪
+		micro.WrapSubscriber(
+			traceplugin.NewSubscriberWrapper(opentracing.GlobalTracer()),
+			trace.SubWrapper,
+		),
 	)
 
 	// 初始化，会解析命令行参数

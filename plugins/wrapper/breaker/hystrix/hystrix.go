@@ -7,8 +7,6 @@ import (
 	"github.com/asim/go-micro/v3/client"
 	"github.com/eapache/go-resiliency/retrier"
 	"log"
-	"net"
-	"net/http"
 	"time"
 )
 
@@ -76,7 +74,7 @@ func Configure(names []string) {
 
 	// 结合 Hystrix Dashboard 将服务状态信息可视化
 	// 不使用可视化工具，可以注释掉
-	hystrixStreamHandler := hystrix.NewStreamHandler()
-	hystrixStreamHandler.Start()
-	go http.ListenAndServe(net.JoinHostPort("", "88"), hystrixStreamHandler)
+	//hystrixStreamHandler := hystrix.NewStreamHandler()
+	//hystrixStreamHandler.Start()
+	//go http.ListenAndServe(net.JoinHostPort("", "88"), hystrixStreamHandler)
 }

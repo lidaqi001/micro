@@ -3,28 +3,55 @@ package trace
 import (
 	"context"
 	"github.com/asim/go-micro/v3/server"
+	"log"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
 
-// spanWrapper is a handler wrapper
+// SpanWrapper is a handler wrapper
 func SpanWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
 
-		//log.Printf("[wrapper] server request: %v", req.Endpoint())
-		//log.Printf("[wrapper] server request params: %v", req.Body())
+		log.Printf(
+			"[Han Wrapper] server request: %v，server request params: %v",
+			req.Endpoint(),
+			req.Body(),
+		)
 
 		sp := jaeger.NewSpan(ctx)
 
-		// Trace：请求service前打印请求tag
-		sp.SetReq(req.Body())
+		// 处理前
+		// Trace：记录 请求值
+		sp.SetRequest(req.Body())
 
-		// 执行 service 注册函数
 		err := fn(ctx, req, rsp)
 
-		// Trace：执行函数后打印 返回值/错误 tag
-		sp.SetRes(rsp, err)
+		// 处理后
+		// Trace：记录 返回值/错误
+		sp.SetResponse(rsp, err)
 
-		//log.Printf("[wrapper] server rsp: %v", rsp)
+		log.Printf("[Han Wrapper] server rsp: %v", rsp)
+
+		return err
+	}
+}
+
+// SubWrapper is a subscriber wrapper
+func SubWrapper(fn server.SubscriberFunc) server.SubscriberFunc {
+	return func(ctx context.Context, msg server.Message) error {
+
+		log.Printf("[Sub Wrapper] Before serving publication topic: %v", msg.Topic())
+
+		sp := jaeger.NewSpan(ctx)
+		sp.SetTopic(msg.Topic())
+		sp.SetHeader(msg.Header())
+		sp.SetPayload(msg.Payload())
+
+		err := fn(ctx, msg)
+
+		sp.SetError(err)
+
+		log.Printf("[Sub Wrapper] After serving publication")
+
 		return err
 	}
 }

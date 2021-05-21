@@ -9,7 +9,7 @@ import (
 	"sxx-go-micro/plugins/client"
 )
 
-func (h *handler) Client1() gin.HandlerFunc {
+func (h *handler) Client() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
 		var (
