@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/asim/go-micro/v3"
-	"sxx-go-micro/examples/config"
+	"sxx-go-micro/common/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/examples/services/async/event/handler"
 	"sxx-go-micro/plugins/service"

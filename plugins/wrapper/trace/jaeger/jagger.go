@@ -7,7 +7,7 @@ import (
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"io"
-	"sxx-go-micro/examples/config"
+	"sxx-go-micro/common/config"
 	"time"
 )
 

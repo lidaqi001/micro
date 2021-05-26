@@ -6,10 +6,11 @@ import (
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
 	"github.com/opentracing/opentracing-go"
 	"log"
-	"sxx-go-micro/examples/config"
+	"sxx-go-micro/common/config"
 	"sxx-go-micro/plugins/wrapper/service/trace"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
@@ -33,7 +34,9 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 		// 服务名称
 		micro.Name(serviceName),
 		// 服务注册
-		micro.Registry(etcd.NewRegistry()),
+		micro.Registry(etcd.NewRegistry(
+			registry.Addrs(config.REGISTER_ADDR),
+		)),
 		// wrap handler
 		micro.WrapHandler(
 			// 基于ratelimit 限流

@@ -5,7 +5,7 @@ import (
 	"github.com/asim/go-micro/v3"
 	"log"
 	"reflect"
-	"sxx-go-micro/examples/config"
+	"sxx-go-micro/common/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
 )

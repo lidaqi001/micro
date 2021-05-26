@@ -7,9 +7,10 @@ import (
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/registry"
 	"log"
+	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
-	"sxx-go-micro/examples/config"
 	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )
@@ -65,7 +66,9 @@ func Create(params Params) (interface{}, error) {
 		// 客户端名称
 		micro.Name(params.ClientName),
 		// 服务发现
-		micro.Registry(etcd.NewRegistry()),
+		micro.Registry(etcd.NewRegistry(
+			registry.Addrs(config.REGISTER_ADDR),
+		)),
 		// 使用 hystrix 实现服务治理
 		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端
