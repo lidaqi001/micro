@@ -3,18 +3,17 @@ package jaeger
 import (
 	"context"
 	"github.com/asim/go-micro/v3/metadata"
+	"github.com/lidaqi001/micro/common/helper"
 	"github.com/opentracing/opentracing-go"
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"io"
-	"os"
 	"time"
 )
 
 // 创建一个jaeger Tracer
 func NewTracer(servicename string) (opentracing.Tracer, io.Closer, error) {
-	addr := os.Getenv("TRACE_ADDR")
-	//addr := config.TRACE_ADDR
+	addr := helper.GetTraceAddress()
 	//traceIp := getTraceIp(addr)
 
 	cfg := jaegercfg.Configuration{

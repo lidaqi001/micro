@@ -15,6 +15,15 @@ func GetRegistryAddress() string {
 	return addr
 }
 
+// 获取注册中心地址
+func GetTraceAddress() string {
+	addr := os.Getenv("TRACE_ADDR")
+	if len(addr) == 0 {
+		return config.TRACE_ADDR
+	}
+	return addr
+}
+
 // 获取限流QPS
 func GetQPS() (float64, int64) {
 	var qpsi int64
