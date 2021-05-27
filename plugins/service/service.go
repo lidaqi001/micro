@@ -48,15 +48,6 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 			traceplugin.NewHandlerWrapper(t),
 			trace.SpanWrapper,
 		),
-		// broker 注册事件到注册中心
-		//micro.Broker(broker.NewBroker(
-		//broker.Registry(
-		//	registry.NewRegistry(
-		//		registry.Addrs(helper.GetRegistryAddress()),
-		//	),
-		//),
-		//broker.Addrs(":9999"),
-		//)),
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
 		micro.WrapSubscriber(
@@ -67,6 +58,7 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 
 	// 初始化，会解析命令行参数
 	service.Init()
+	// 将broker设置为不限制ip，默认为127.0.0.1
 	service.Options().Broker.Init(broker.Addrs(":8888"))
 	// 注册处理器，调用服务接口处理请求
 	registerService(service)
