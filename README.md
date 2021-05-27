@@ -1,6 +1,6 @@
 # micro
 
-> 基于asim/go-micro微服务框架
+> 基于[asim/go-micro](https://github.com/asim/go-micro)微服务框架(Thanks [asim](https://github.com/asim))
 
 > 进一步封装了一些功能组件，包括对应的示例
 
