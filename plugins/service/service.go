@@ -28,8 +28,6 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 	// PS：只在 service 声明
 	opentracing.SetGlobalTracer(t)
 
-	micro.RegisterHandler()
-
 	// 创建新的服务
 	service := micro.NewService(
 		// 使用grpc协议
