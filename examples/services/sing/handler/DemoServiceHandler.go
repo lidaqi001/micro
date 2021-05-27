@@ -4,10 +4,10 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"log"
-	"sxx-go-micro/common/helper"
-	"sxx-go-micro/examples/config"
-	"sxx-go-micro/examples/proto/user"
-	"sxx-go-micro/plugins/client"
+	"github.com/lidaqi001/micro/common/helper"
+	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/examples/proto/user"
+	"github.com/lidaqi001/micro/plugins/client"
 )
 
 type DemoServiceHandler struct {

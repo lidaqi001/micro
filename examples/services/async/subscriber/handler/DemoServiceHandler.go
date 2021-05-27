@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/asim/go-micro/v3/broker"
 	"log"
-	"sxx-go-micro/examples/proto/user"
+	"github.com/lidaqi001/micro/examples/proto/user"
 )
 
 type DemoServiceHandler struct {

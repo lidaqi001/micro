@@ -10,9 +10,9 @@ import (
 	"github.com/juju/ratelimit"
 	"github.com/opentracing/opentracing-go"
 	"log"
-	"sxx-go-micro/examples/config"
-	"sxx-go-micro/plugins/wrapper/service/trace"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
+	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 )
 
 func Create(serviceName string, registerService func(service micro.Service)) {

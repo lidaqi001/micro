@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"log"
-	"sxx-go-micro/examples/proto/event"
-	"sxx-go-micro/examples/proto/user"
+	"github.com/lidaqi001/micro/examples/proto/event"
+	"github.com/lidaqi001/micro/examples/proto/user"
 	"time"
 )
 

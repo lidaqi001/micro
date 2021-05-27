@@ -8,9 +8,9 @@ import (
 	"github.com/asim/go-micro/v3/broker"
 	"github.com/opentracing/opentracing-go"
 	"log"
-	"sxx-go-micro/examples/proto/event"
-	"sxx-go-micro/plugins/wrapper/service/trace"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
+	"github.com/lidaqi001/micro/examples/proto/event"
+	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"time"
 )
 

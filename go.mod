@@ -1,4 +1,4 @@
-module micro
+module github.com/lidaqi001/micro
 
 go 1.16
 

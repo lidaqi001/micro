@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3/server"
 	"log"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 )
 
 // SpanWrapper is a handler wrapper

@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"sxx-go-micro/examples/api/handler"
-	"sxx-go-micro/examples/api/jwt"
-	"sxx-go-micro/examples/api/middleware"
+	"github.com/lidaqi001/micro/examples/api/handler"
+	"github.com/lidaqi001/micro/examples/api/jwt"
+	"github.com/lidaqi001/micro/examples/api/middleware"
 )
 
 func main() {

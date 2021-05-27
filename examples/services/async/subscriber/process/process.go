@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"sxx-go-micro/examples/proto/event"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
+	"github.com/lidaqi001/micro/examples/proto/event"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"time"
 )
 

@@ -9,10 +9,10 @@ import (
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
 	"log"
-	"sxx-go-micro/common/helper"
-	"sxx-go-micro/examples/config"
-	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
-	"sxx-go-micro/plugins/wrapper/trace/jaeger"
+	"github.com/lidaqi001/micro/common/helper"
+	"github.com/lidaqi001/micro/examples/config"
+	hystrix "github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 )
 
 // Create params struct

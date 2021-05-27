@@ -2,10 +2,10 @@ package main
 
 import (
 	"github.com/asim/go-micro/v3"
-	"sxx-go-micro/examples/config"
-	"sxx-go-micro/examples/proto/user"
-	"sxx-go-micro/examples/services/speak/handler"
-	"sxx-go-micro/plugins/service"
+	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/examples/proto/user"
+	"github.com/lidaqi001/micro/examples/services/speak/handler"
+	"github.com/lidaqi001/micro/plugins/service"
 )
 
 func main() {

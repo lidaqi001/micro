@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"math/rand"
-	"sxx-go-micro/examples/config"
-	"sxx-go-micro/examples/proto/user"
+	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/examples/proto/user"
 	"time"
 )
 
