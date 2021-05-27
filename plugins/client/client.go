@@ -8,11 +8,11 @@ import (
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
-	"log"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/examples/config"
 	hystrix "github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
+	"log"
 )
 
 // Create params struct
@@ -67,7 +67,7 @@ func Create(params Params) (interface{}, error) {
 		micro.Name(params.ClientName),
 		// 服务发现
 		micro.Registry(etcd.NewRegistry(
-			registry.Addrs(config.REGISTER_ADDR),
+			registry.Addrs(helper.GetRegistryAddress()),
 		)),
 		// 使用 hystrix 实现服务治理
 		micro.WrapClient(hystrix.NewClientWrapper()),

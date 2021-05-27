@@ -8,11 +8,11 @@ import (
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
-	"github.com/opentracing/opentracing-go"
-	"log"
-	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
+	"github.com/opentracing/opentracing-go"
+	"log"
 )
 
 func Create(serviceName string, registerService func(service micro.Service)) {
@@ -35,15 +35,13 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 		micro.Name(serviceName),
 		// 服务注册
 		micro.Registry(etcd.NewRegistry(
-			registry.Addrs(config.REGISTER_ADDR),
+			registry.Addrs(helper.GetRegistryAddress()),
 		)),
 		// wrap handler
 		micro.WrapHandler(
 			// 基于ratelimit 限流
 			ratelimiter.NewHandlerWrapper(
-				ratelimit.NewBucketWithRate(float64(config.QPS), int64(config.QPS)),
-				false,
-			),
+				ratelimit.NewBucketWithRate(helper.GetQPS()), false),
 			// 基于 jaeger 采集追踪数据
 			// handler 调用服务-链路追踪
 			traceplugin.NewHandlerWrapper(t),
@@ -52,7 +50,7 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
 		micro.WrapSubscriber(
-			traceplugin.NewSubscriberWrapper(opentracing.GlobalTracer()),
+			traceplugin.NewSubscriberWrapper(t),
 			trace.SubWrapper,
 		),
 	)

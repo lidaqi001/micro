@@ -7,13 +7,14 @@ import (
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"io"
-	"github.com/lidaqi001/micro/examples/config"
+	"os"
 	"time"
 )
 
 // 创建一个jaeger Tracer
 func NewTracer(servicename string) (opentracing.Tracer, io.Closer, error) {
-	addr := config.TRACE_ADDR
+	addr := os.Getenv("TRACE_ADDR")
+	//addr := config.TRACE_ADDR
 	//traceIp := getTraceIp(addr)
 
 	cfg := jaegercfg.Configuration{

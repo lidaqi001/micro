@@ -21,8 +21,8 @@ const (
 	SERVICE_ASYNC_SUBSCRIBER = "async_subscriber"
 
 	// Jaeger 服务端Ip地址
-	TRACE_ADDR = "192.168.1.146:6831"
+	TRACE_ADDR = "127.0.0.1:6831"
 
 	// 服务注册中心地址
-	REGISTER_ADDR = "etcd1:2379"
+	REGISTRY_ADDR = "127.0.0.1:2379"
 )
