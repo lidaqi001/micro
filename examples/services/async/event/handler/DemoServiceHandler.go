@@ -3,8 +3,8 @@ package handler
 import (
 	"context"
 	"github.com/asim/go-micro/v3"
-	"log"
 	"github.com/lidaqi001/micro/examples/proto/user"
+	"log"
 )
 
 type DemoServiceHandler struct {
@@ -12,6 +12,9 @@ type DemoServiceHandler struct {
 }
 
 func (s *DemoServiceHandler) SayHelloByUserId(ctx context.Context, req *user.UserRequest, rsp *user.DemoResponse) error {
+	text := "async.event::你好, " + req.Id
+	log.Println("拼接结果：" + text)
+	rsp.Text = text
 	go func() {
 		_ = s.publishSayHelloByUserId(req)
 	}()
@@ -19,8 +22,7 @@ func (s *DemoServiceHandler) SayHelloByUserId(ctx context.Context, req *user.Use
 }
 
 func (s *DemoServiceHandler) SayHello(ctx context.Context, req *user.DemoRequest, rsp *user.DemoResponse) error {
-	text := ""
-	text = "sing::你好, " + req.Name
+	text := "async.event::你好, " + req.Name
 	log.Println("拼接结果：" + text)
 	rsp.Text = text
 	go func() {

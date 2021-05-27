@@ -3,9 +3,9 @@ package handler
 import (
 	"context"
 	"github.com/asim/go-micro/v3"
-	"log"
 	"github.com/lidaqi001/micro/examples/proto/event"
 	"github.com/lidaqi001/micro/examples/proto/user"
+	"log"
 	"time"
 )
 

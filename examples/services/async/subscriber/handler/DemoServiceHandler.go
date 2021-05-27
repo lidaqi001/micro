@@ -1,19 +1,31 @@
 package handler
 
 import (
-	"encoding/json"
-	"github.com/asim/go-micro/v3/broker"
+	"context"
+	"fmt"
+	"github.com/lidaqi001/micro/examples/proto/event"
+	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"log"
-	"github.com/lidaqi001/micro/examples/proto/user"
 )
 
-type DemoServiceHandler struct {
-	PubSub broker.Broker
+func CallSing(ctx context.Context, event *event.DemoEvent) error {
+	//time.Sleep(time.Second * 1)
+	out := fmt.Sprintf("Got sub：%v", event)
+	log.Println(out)
+	// 因为异步消息没有response对象
+	// 所以手动记录tarce
+	sp := jaeger.NewSpan(ctx)
+	sp.SetResponse(out, nil, false)
+	return nil
 }
 
-func ProcessEvent(event broker.Event) error {
-	out := new(user.UserRequest)
-	_ = json.Unmarshal(event.Message().Body, &out)
-	log.Println("Got event::: ",event.Message().Header, out)
+func SingEvent(ctx context.Context, event *event.DemoEvent) error {
+	//time.Sleep(time.Second * 1)
+	out := fmt.Sprintf("Got sub：%v", event)
+	log.Println(out)
+	// 因为异步消息没有response对象
+	// 所以手动记录tarce
+	sp := jaeger.NewSpan(ctx)
+	sp.SetResponse(out, nil, false)
 	return nil
 }
