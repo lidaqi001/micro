@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"log"
-	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"sxx-go-micro/plugins/client"
 )

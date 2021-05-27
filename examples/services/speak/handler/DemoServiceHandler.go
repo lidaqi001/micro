@@ -3,7 +3,7 @@ package handler
 import (
 	"context"
 	"math/rand"
-	"sxx-go-micro/common/config"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/examples/proto/user"
 	"time"
 )

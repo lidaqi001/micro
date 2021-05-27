@@ -9,8 +9,8 @@ import (
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
 	"log"
-	"sxx-go-micro/common/config"
 	"sxx-go-micro/common/helper"
+	"sxx-go-micro/examples/config"
 	hystrix "sxx-go-micro/plugins/wrapper/breaker/hystrix"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )

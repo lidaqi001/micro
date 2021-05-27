@@ -10,7 +10,7 @@ import (
 	"github.com/juju/ratelimit"
 	"github.com/opentracing/opentracing-go"
 	"log"
-	"sxx-go-micro/common/config"
+	"sxx-go-micro/examples/config"
 	"sxx-go-micro/plugins/wrapper/service/trace"
 	"sxx-go-micro/plugins/wrapper/trace/jaeger"
 )

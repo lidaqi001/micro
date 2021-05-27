@@ -1,4 +1,4 @@
-module sxx-go-micro
+module micro
 
 go 1.16
 
