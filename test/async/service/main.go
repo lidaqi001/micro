@@ -21,7 +21,12 @@ func main2() {
 		micro.WrapHandler(traceplugin.NewHandlerWrapper(opentracing.GlobalTracer())),
 	)
 	pbsb := service.Server().Options().Broker
+	service.Server().Options().Broker.Init(broker.Addrs(":8000"))
 	pbsb.Connect()
+
+	//broker.Connect()
+	//defer broker.Disconnect()
+
 	go func() {
 		for now := range time.Tick(5 * time.Second) {
 			log.Println("Publishering weather alerts to topic: alerts")
@@ -31,6 +36,7 @@ func main2() {
 				Temperature: 28,
 			}
 			body, _ := json.Marshal(test)
+			//broker.Publish("alerts", &broker.Message{
 			pbsb.Publish("alerts", &broker.Message{
 				Header: map[string]string{
 					"city": test.City,
@@ -80,6 +86,7 @@ func main() {
 		//),
 	)
 	service.Init()
+	service.Options().Broker.Init(broker.Addrs(":8888"))
 
 	p := micro.NewEvent("alerts", service.Client())
 	go func() {

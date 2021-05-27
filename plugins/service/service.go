@@ -6,6 +6,7 @@ import (
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/broker"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
 	"github.com/lidaqi001/micro/common/helper"
@@ -27,6 +28,8 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 	// PS：只在 service 声明
 	opentracing.SetGlobalTracer(t)
 
+	micro.RegisterHandler()
+
 	// 创建新的服务
 	service := micro.NewService(
 		// 使用grpc协议
@@ -47,6 +50,15 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 			traceplugin.NewHandlerWrapper(t),
 			trace.SpanWrapper,
 		),
+		// broker 注册事件到注册中心
+		//micro.Broker(broker.NewBroker(
+		//broker.Registry(
+		//	registry.NewRegistry(
+		//		registry.Addrs(helper.GetRegistryAddress()),
+		//	),
+		//),
+		//broker.Addrs(":9999"),
+		//)),
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
 		micro.WrapSubscriber(
@@ -57,7 +69,7 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 
 	// 初始化，会解析命令行参数
 	service.Init()
-
+	service.Options().Broker.Init(broker.Addrs(":8888"))
 	// 注册处理器，调用服务接口处理请求
 	registerService(service)
 
