@@ -38,6 +38,9 @@ REGISTRY_ADDR=127.0.0.1:2379
 
 // Jaeger Agent地址（6831端口）
 TRACE_ADDR=127.0.0.1:6831
+
+// 
+jiagnsujiang 
 ```
 
 - 快速运行
@@ -60,3 +63,9 @@ TRACE_ADDR=127.0.0.1:6831
     ```
   sh shell/example.sh
     ```
+  
+  - 具体路由查看网关定义
+  
+  ```
+  文件地址：examples/api/api.go
+  ```  
