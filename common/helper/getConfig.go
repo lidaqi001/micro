@@ -18,7 +18,7 @@ func GetTraceAddress() string {
 
 // 获取限流QPS
 func GetQPS() (float64, int64) {
-	qps := GetConfig("QPS", string(config.QPS))
+	qps := GetConfig("QPS", config.QPS)
 	qpsf, _ := strconv.ParseFloat(qps, 64)
 	qpsi, _ := strconv.ParseInt(qps, 10, 64)
 	return qpsf, qpsi

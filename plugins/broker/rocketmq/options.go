@@ -6,13 +6,10 @@ import (
 
 type optionsKeyType struct{}
 
-type subscribeOptionsKeyType struct{}
-
 var (
 	DefaultKeyValue = ""
 
-	optionsKey          = optionsKeyType{}
-	subscribeOptionsKey = subscribeOptionsKeyType{}
+	optionsKey = optionsKeyType{}
 )
 
 // options contain additional options for the broker.

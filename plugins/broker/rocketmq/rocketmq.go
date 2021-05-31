@@ -18,6 +18,7 @@ type rBroker struct {
 	opts      broker.Options
 	bopts     *brokerOptions
 	client    mq_http_sdk.MQClient
+	consume   mq_http_sdk.MQConsumer
 	connected bool
 }
 
@@ -109,14 +110,18 @@ func (r *rBroker) Init(opts ...broker.Option) error {
 }
 
 func (r *rBroker) Connect() error {
-	if len(r.bopts.accessKey) == 0 {
-		return errors.New("accessKey param is null!")
-	}
-	if len(r.bopts.secretKey) == 0 {
-		return errors.New("secretKey param is null!")
-	}
-	if len(r.bopts.endpoint) == 0 {
-		return errors.New("endpoint param is null!")
+
+	switch {
+	case len(r.bopts.groupId) == 0:
+		return err("groupId")
+	case len(r.bopts.endpoint) == 0:
+		return err("endpoint")
+	case len(r.bopts.accessKey) == 0:
+		return err("accessKey")
+	case len(r.bopts.secretKey) == 0:
+		return err("secretKey")
+	case len(r.bopts.instanceId) == 0:
+		return err("instanceId")
 	}
 
 	client := mq_http_sdk.NewAliyunMQClient(
@@ -174,13 +179,19 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 		o(&options)
 	}
 
-	mqConsumer := r.client.GetConsumer(r.bopts.instanceId, topic, r.bopts.groupId, "")
+	r.consume = r.client.GetConsumer(r.bopts.instanceId, topic, r.bopts.groupId, "")
 
 	s := &subscriber{
 		topic:  topic,
 		handle: handler,
 		opts:   options,
 	}
+	go r.recv(topic, handler, s)
+	return s, nil
+}
+
+func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
+
 	for {
 		endChan := make(chan int)
 		respChan := make(chan mq_http_sdk.ConsumeMessageResponse)
@@ -204,7 +215,7 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 						_ = r.opts.Codec.Unmarshal([]byte(body), &rst)
 
 						p := &publication{
-							c:       mqConsumer,
+							c:       r.consume,
 							topic:   topic,
 							message: rst,
 							handles: handles,
@@ -244,14 +255,12 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 
 		// 长轮询消费消息
 		// 长轮询表示如果topic没有消息则请求会在服务端挂住3s，3s内如果有消息可以消费则立即返回
-		mqConsumer.ConsumeMessage(respChan, errChan,
+		r.consume.ConsumeMessage(respChan, errChan,
 			10, // 一次最多消费3条(最多可设置为16条)
 			10, // 长轮询时间3秒（最多可设置为30秒）
 		)
 		<-endChan
 	}
-
-	return s, nil
 }
 
 func (r *rBroker) String() string {
@@ -271,4 +280,9 @@ func (r *rBroker) Address() string {
 
 func (r *rBroker) Boptions() *brokerOptions {
 	return r.bopts
+}
+
+func err(param string) error {
+	m := fmt.Sprintf("rocketmq：%s param is null!", param)
+	return errors.New(m)
 }

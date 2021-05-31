@@ -5,9 +5,8 @@ go 1.16
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
-	github.com/aliyunmq/mq-http-go-sdk v1.0.3
+	github.com/aliyunmq/mq-http-go-sdk v1.0.3 // indirect
 	github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
-	github.com/asim/go-micro/plugins/registry/consul/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb
@@ -18,7 +17,7 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
-	github.com/gogap/errors v0.0.0-20200228125012-531a6449b28c
+	github.com/gogap/errors v0.0.0-20200228125012-531a6449b28c // indirect
 	github.com/gogap/stack v0.0.0-20150131034635-fef68dddd4f8 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/json-iterator/go v1.1.11 // indirect

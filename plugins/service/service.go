@@ -16,7 +16,7 @@ import (
 	"log"
 )
 
-func Create(serviceName string, registerService func(service micro.Service)) {
+func Create(serviceName string, registerService func(service micro.Service), opts ...micro.Option) {
 
 	// 初始化全局服务追踪
 	t, io, err := jaeger.NewTracer(serviceName)
@@ -58,7 +58,7 @@ func Create(serviceName string, registerService func(service micro.Service)) {
 	)
 
 	// 初始化，会解析命令行参数
-	service.Init()
+	service.Init(opts...)
 
 	// 将broker设置为不限制ip，默认为127.0.0.1
 	_ = service.Options().Broker.Init(

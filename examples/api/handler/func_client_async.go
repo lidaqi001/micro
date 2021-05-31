@@ -21,7 +21,7 @@ func (h *handler) ClientAsyncA() gin.HandlerFunc {
 			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
 
 				// 业务代码处理
-				cli := user.NewDemoService(config.SERVICE_ASYNC_EVENT, srv.Client())
+				cli := user.NewDemoService(config.SERVICE_ASYNC_EVENT_ROCKETMQ, srv.Client())
 				return cli.SayHello(ctx, &user.DemoRequest{Name: "ClientAsyncA"})
 			},
 		}

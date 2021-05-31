@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/asim/go-micro/v3/broker"
 	"log"
@@ -18,7 +19,9 @@ func CallSing(event broker.Event) error {
 }
 
 func SingEvent(event broker.Event) error {
-	out := fmt.Sprintf("Got sub：%v", event)
+	var rst interface{}
+	_ = json.Unmarshal(event.Message().Body, &rst)
+	out := fmt.Sprintf("Got sub：%v", rst)
 	log.Println(out)
 	return nil
 }
