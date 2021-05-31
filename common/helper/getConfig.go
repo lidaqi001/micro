@@ -8,39 +8,26 @@ import (
 
 // 获取注册中心地址
 func GetRegistryAddress() string {
-	addr := os.Getenv("REGISTRY_ADDR")
-	if len(addr) == 0 {
-		return config.REGISTRY_ADDR
-	}
-	return addr
+	return GetConfig("REGISTRY_ADDR", config.REGISTRY_ADDR)
 }
 
-// 获取注册中心地址
+// 获取链路追踪地址
 func GetTraceAddress() string {
-	addr := os.Getenv("TRACE_ADDR")
-	if len(addr) == 0 {
-		return config.TRACE_ADDR
-	}
-	return addr
+	return GetConfig("TRACE_ADDR", config.TRACE_ADDR)
 }
 
 // 获取限流QPS
 func GetQPS() (float64, int64) {
-	var qpsi int64
-	var qpsf float64
-
-	qps := os.Getenv("QPS")
-
-	if len(qps) == 0 {
-		// 未设置env，使用默认配置
-		qps := config.QPS
-		qpsf = float64(qps)
-		qpsi = int64(qps)
-
-	} else {
-		qpsf, _ = strconv.ParseFloat(qps, 64)
-		qpsi, _ = strconv.ParseInt(qps, 10, 64)
-	}
-
+	qps := GetConfig("QPS", string(config.QPS))
+	qpsf, _ := strconv.ParseFloat(qps, 64)
+	qpsi, _ := strconv.ParseInt(qps, 10, 64)
 	return qpsf, qpsi
+}
+
+func GetConfig(envK string, defaultK string) string {
+	env := os.Getenv(envK)
+	if len(env) == 0 {
+		return defaultK
+	}
+	return env
 }

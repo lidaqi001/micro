@@ -20,7 +20,7 @@ func main() {
 		})
 	})
 
-	//jwt
+	// jwt
 	r.GET("/login/:username/:password", jwt.Login)
 	auth := r.Group("auth").Use(middleware.Auth())
 	{
@@ -29,7 +29,7 @@ func main() {
 		auth.GET("/sayHello", jwt.SayHello)
 	}
 
-	// 示例
+	// 示例请求
 	call := r.Group("/call")
 	{
 		call.GET("/handler", h.Client())
