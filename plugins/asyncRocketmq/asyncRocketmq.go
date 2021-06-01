@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/broker"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	"github.com/lidaqi001/micro/examples/config"
 	"github.com/lidaqi001/micro/plugins/broker/rocketmq"
 	"github.com/lidaqi001/micro/plugins/service"
 )

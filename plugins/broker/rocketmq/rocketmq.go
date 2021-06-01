@@ -18,7 +18,6 @@ type rBroker struct {
 	opts      broker.Options
 	bopts     *brokerOptions
 	client    mq_http_sdk.MQClient
-	consume   mq_http_sdk.MQConsumer
 	connected bool
 }
 
@@ -179,8 +178,6 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 		o(&options)
 	}
 
-	r.consume = r.client.GetConsumer(r.bopts.instanceId, topic, r.bopts.groupId, "")
-
 	s := &subscriber{
 		topic:  topic,
 		handle: handler,
@@ -191,6 +188,8 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 }
 
 func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
+
+	consume := r.client.GetConsumer(r.bopts.instanceId, topic, r.bopts.groupId, "")
 
 	for {
 		endChan := make(chan int)
@@ -215,7 +214,7 @@ func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
 						_ = r.opts.Codec.Unmarshal([]byte(body), &rst)
 
 						p := &publication{
-							c:       r.consume,
+							c:       consume,
 							topic:   topic,
 							message: rst,
 							handles: handles,
@@ -255,7 +254,7 @@ func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
 
 		// 长轮询消费消息
 		// 长轮询表示如果topic没有消息则请求会在服务端挂住3s，3s内如果有消息可以消费则立即返回
-		r.consume.ConsumeMessage(respChan, errChan,
+		consume.ConsumeMessage(respChan, errChan,
 			10, // 一次最多消费3条(最多可设置为16条)
 			10, // 长轮询时间3秒（最多可设置为30秒）
 		)

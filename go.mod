@@ -19,7 +19,7 @@ require (
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210531083824-2e3b8c42b00b
+	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601060020-d18518aed260
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.27.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect

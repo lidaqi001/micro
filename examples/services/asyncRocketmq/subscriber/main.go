@@ -12,9 +12,7 @@ func main() {
 	asyncRocketmq.Create(
 		config.SERVICE_ASYNC_SUBSCRIBER_ROCKETMQ,
 		func(service micro.Service, pbsb broker.Broker) {
-			pbsb.Subscribe(config.ROCKETMQ_TOPIC_DEFAULT, handler.SingEvent)
-			//_ = micro.RegisterSubscriber("singEvent", service.Server(), handler.SingEvent)
-			//_ = micro.RegisterSubscriber("callSing", service.Server(), handler.CallSing)
-
+			_, _ = pbsb.Subscribe(config.ROCKETMQ_TOPIC_DEFAULT, handler.SingEvent)
+			_, _ = pbsb.Subscribe(config.ROCKETMQ_TOPIC_DEFAULT, handler.CallSing)
 		})
 }
