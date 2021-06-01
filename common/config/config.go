@@ -7,11 +7,11 @@ const (
 	*******************************************************/
 
 	ROCKETMQ_TOPIC_DEFAULT = "go_micro"
-	ROCKETMQ_INSTANCE_ID   = "MQ_INST_1499610345034019_BbUpu0pc"
-	ROCKETMQ_ACCESS_KEY    = "LTAI5tRPjP2wq85FShi5aqi9"
-	ROCKETMQ_SECRET_KEY    = "UhD2XH6NwAnXYGrwnBCCazZfEY1xlH"
-	ROCKETMQ_ENDPOINT      = "http://1499610345034019.mqrest.cn-hangzhou.aliyuncs.com"
-	ROCKETMQ_GROUP_ID      = "GID_go_micro"
+	ROCKETMQ_INSTANCE_ID   = ""
+	ROCKETMQ_ACCESS_KEY    = ""
+	ROCKETMQ_SECRET_KEY    = ""
+	ROCKETMQ_ENDPOINT      = ""
+	ROCKETMQ_GROUP_ID      = ""
 
 	/*******************************************************
 						限流配置

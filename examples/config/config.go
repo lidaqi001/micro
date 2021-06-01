@@ -6,9 +6,12 @@ const (
 					rocketmq（阿里云）配置
 	*******************************************************/
 
-	//ROCKETMQ_GROUP_ID      = ""
-	//ROCKETMQ_ENDPOINT      = ""
-	//ROCKETMQ_ACCESS_KEY    = ""
+	ROCKETMQ_TOPIC_DEFAULT = "go_micro"
+	ROCKETMQ_INSTANCE_ID   = ""
+	ROCKETMQ_ACCESS_KEY    = ""
+	ROCKETMQ_SECRET_KEY    = ""
+	ROCKETMQ_ENDPOINT      = ""
+	ROCKETMQ_GROUP_ID      = ""
 
 
 	/*******************************************************
