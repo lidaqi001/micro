@@ -12,6 +12,6 @@ func main() {
 		config.SERVICE_ASYNC_SUBSCRIBER,
 		func(service micro.Service) {
 			_ = micro.RegisterSubscriber("singEvent", service.Server(), handler.SingEvent)
-			_ = micro.RegisterSubscriber("callSing", service.Server(), handler.CallSing)
+			_ = micro.RegisterSubscriber("singEvent", service.Server(), handler.CallSing)
 		})
 }

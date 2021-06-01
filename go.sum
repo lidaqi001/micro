@@ -67,6 +67,8 @@ github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5 h1:0CwZNZbxp69SHPd
 github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5/go.mod h1:wHh0iHkYZB8zMSxRWpUBQtwG5a7fFgvEO+odwuTv2gs=
 github.com/asim/go-micro/plugins/broker/memory/v3 v3.0.0-20210202145831-070250155285 h1:DUDMXvS9LfkgDYBRnKEJh7yPfV+tXOvLqIszqNg4DYc=
 github.com/asim/go-micro/plugins/broker/memory/v3 v3.0.0-20210202145831-070250155285/go.mod h1:IJrBUDk0XAbi0iDg+sKgkY588m311TkSoEAjU9xu/mc=
+github.com/asim/go-micro/plugins/broker/redis/v3 v3.0.0-20210601052333-ca2014bf8e50 h1:pyQjNhP/TgRN/fpqeodvwlbJlXsNq9gui/UWVe1medI=
+github.com/asim/go-micro/plugins/broker/redis/v3 v3.0.0-20210601052333-ca2014bf8e50/go.mod h1:4q5rNEY4uIEJU6pqLMVglB+kmc3nS8fDQ4KZ8rrR/MQ=
 github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210205090925-e8167a8b79ed/go.mod h1:Mx1EwGdIq7wl5IkKLaGbHtoIC4yvqUNxJtZu6wxsqiU=
 github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb h1:v69db4/3BBj/oqqw+OyKxfMQqjYMOTrV0YcJJBjqGtw=
 github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb/go.mod h1:Mx1EwGdIq7wl5IkKLaGbHtoIC4yvqUNxJtZu6wxsqiU=
@@ -245,6 +247,8 @@ github.com/golang/protobuf v1.5.2 h1:ROPKBNFfQgOUMifHyP+KYbvpjbdoFNs+aK7DXlji0Tw
 github.com/golang/protobuf v1.5.2/go.mod h1:XVQd3VNwM+JqD3oG2Ue2ip4fOMUkwXdXDdiuN0vRsmY=
 github.com/golang/snappy v0.0.0-20180518054509-2e65f85255db/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
 github.com/golang/snappy v0.0.3/go.mod h1:/XxbfmMg8lxefKM7IXC3fBNl/7bRcc72aCRzEWrmP2Q=
+github.com/gomodule/redigo v2.0.0+incompatible h1:K/R+8tc58AaqLkqG2Ol3Qk+DR/TlNuhuh457pBFPtt0=
+github.com/gomodule/redigo v2.0.0+incompatible/go.mod h1:B4C85qUVwatsJoIUNIfCRsp7qO0iAmpGFZ4EELWSbC4=
 github.com/google/btree v0.0.0-20180813153112-4030bb1f1f0c/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/btree v1.0.0/go.mod h1:lNA+9X1NB3Zf8V7Ke586lFgjr2dZNuvo3lPJSGZ5JPQ=
 github.com/google/go-cmp v0.2.0/go.mod h1:oXzfMopK8JAjlY9xF4vHSVASa0yLyX7SntLO5aqRK0M=
@@ -333,8 +337,6 @@ github.com/labbsr0x/goh v1.0.1/go.mod h1:8K2UhVoaWXcCU7Lxoa2omWnC8gyW8px7/lmO61c
 github.com/leodido/go-urn v1.2.0/go.mod h1:+8+nEpDfqqsY+g338gtMEUOtuK+4dEMhiQEgxpxOKII=
 github.com/leodido/go-urn v1.2.1 h1:BqpAaACuzVSgi/VLzGZIobT2z4v53pjosyNd9Yv6n/w=
 github.com/leodido/go-urn v1.2.1/go.mod h1:zt4jvISO2HfUBqxjfIshjdMTYS56ZS/qv49ictyFfxY=
-github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601060020-d18518aed260 h1:t+HGJ1s7GQV+iCCMVFIVjVkoWyrJvDLLKrHdy/e+hS8=
-github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601060020-d18518aed260/go.mod h1:WZh6rPuQv2Dyypl9C2odMg9Z3adFpkXVDQyP3FdqnjU=
 github.com/linode/linodego v0.10.0/go.mod h1:cziNP7pbvE3mXIPneHj0oRY8L1WtGEIKlZ8LANE4eXA=
 github.com/liquidweb/liquidweb-go v1.6.0/go.mod h1:UDcVnAMDkZxpw4Y7NOHkqoeiGacVLEIG/i5J9cyixzQ=
 github.com/lucas-clemente/quic-go v0.19.3/go.mod h1:ADXpNbTQjq1hIzCpB+y/k5iz4n4z4IwqoLb94Kh5Hu8=

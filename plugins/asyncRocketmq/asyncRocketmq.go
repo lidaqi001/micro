@@ -28,7 +28,6 @@ func Create(serviceName string, registerService func(service micro.Service, pbsb
 	}, micro.Broker(
 		// 设置 rocketmq 作为 broker 驱动
 		rocketmq.NewBroker(
-			rocketmq.GroupId(helper.GetConfig("ROCKETMQ_GROUP_ID", config.ROCKETMQ_GROUP_ID)),
 			rocketmq.Endpoint(helper.GetConfig("ROCKETMQ_ENDPOINT", config.ROCKETMQ_ENDPOINT)),
 			rocketmq.AccessKey(helper.GetConfig("ROCKETMQ_ACCESS_KEY", config.ROCKETMQ_ACCESS_KEY)),
 			rocketmq.SecretKey(helper.GetConfig("ROCKETMQ_SECRET_KEY", config.ROCKETMQ_SECRET_KEY)),

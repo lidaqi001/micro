@@ -10,7 +10,7 @@ import (
 
 func CallSing(ctx context.Context, event *event.DemoEvent) error {
 	//time.Sleep(time.Second * 1)
-	out := fmt.Sprintf("Got sub：%v", event)
+	out := fmt.Sprintf("Got sub1：%v", event)
 	log.Println(out)
 	// 因为异步消息没有response对象
 	// 所以手动记录tarce
@@ -21,7 +21,7 @@ func CallSing(ctx context.Context, event *event.DemoEvent) error {
 
 func SingEvent(ctx context.Context, event *event.DemoEvent) error {
 	//time.Sleep(time.Second * 1)
-	out := fmt.Sprintf("Got sub：%v", event)
+	out := fmt.Sprintf("Got sub2：%v", event)
 	log.Println(out)
 	// 因为异步消息没有response对象
 	// 所以手动记录tarce

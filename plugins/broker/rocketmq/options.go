@@ -5,11 +5,18 @@ import (
 )
 
 type optionsKeyType struct{}
+type sOptionsKeyType struct{}
+type pOptionsKeyType struct{}
 
 var (
 	DefaultKeyValue = ""
+	DefaultTagValue = "go-micro"
 
 	optionsKey = optionsKeyType{}
+
+	sOptionsKey = sOptionsKeyType{}
+
+	pOptionsKey = pOptionsKeyType{}
 )
 
 // options contain additional options for the broker.
@@ -22,8 +29,16 @@ type brokerOptions struct {
 	secretKey string
 	// Topic所属实例ID，默认实例为空
 	instanceId string
+}
+type sBrokerOptions struct {
 	// 您在控制台创建的 Consumer ID(Group ID)
 	groupId string
+	// 订阅Tag
+	subTag string
+}
+type pBrokerOptions struct {
+	// 消息Tag
+	tag string
 }
 
 func AccessKey(key string) broker.Option {
@@ -54,9 +69,23 @@ func InstanceId(id string) broker.Option {
 	}
 }
 
-func GroupId(id string) broker.Option {
-	return func(o *broker.Options) {
-		bo := o.Context.Value(optionsKey).(*brokerOptions)
+func GroupId(id string) broker.SubscribeOption {
+	return func(o *broker.SubscribeOptions) {
+		bo := o.Context.Value(sOptionsKey).(*sBrokerOptions)
 		bo.groupId = id
+	}
+}
+
+func SubTag(key string) broker.SubscribeOption {
+	return func(o *broker.SubscribeOptions) {
+		bo := o.Context.Value(sOptionsKey).(*sBrokerOptions)
+		bo.subTag = key
+	}
+}
+
+func Tag(key string) broker.PublishOption {
+	return func(o *broker.PublishOptions) {
+		bo := o.Context.Value(pOptionsKey).(*pBrokerOptions)
+		bo.tag = key
 	}
 }

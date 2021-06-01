@@ -6,7 +6,6 @@ import (
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/broker"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
 	"github.com/lidaqi001/micro/common/helper"
@@ -61,9 +60,9 @@ func Create(serviceName string, registerService func(service micro.Service), opt
 	service.Init(opts...)
 
 	// 将broker设置为不限制ip，默认为127.0.0.1
-	_ = service.Options().Broker.Init(
-		broker.Addrs("0.0.0.0:"),
-	)
+	//_ = service.Options().Broker.Init(
+	//	broker.Addrs("0.0.0.0:"),
+	//)
 
 	// 注册处理器，调用服务接口处理请求
 	registerService(service)

@@ -63,6 +63,7 @@ type subscriber struct {
 	topic  string
 	handle broker.Handler
 	opts   broker.SubscribeOptions
+	bopts  *sBrokerOptions
 }
 
 func (s subscriber) Options() broker.SubscribeOptions {
@@ -111,8 +112,6 @@ func (r *rBroker) Init(opts ...broker.Option) error {
 func (r *rBroker) Connect() error {
 
 	switch {
-	case len(r.bopts.groupId) == 0:
-		return err("groupId")
 	case len(r.bopts.endpoint) == 0:
 		return err("endpoint")
 	case len(r.bopts.accessKey) == 0:
@@ -145,16 +144,27 @@ func (r *rBroker) Disconnect() error {
 
 func (r *rBroker) Publish(topic string, m *broker.Message, opts ...broker.PublishOption) error {
 
+	bopts := &pBrokerOptions{
+		tag: DefaultTagValue,
+	}
+	options := broker.PublishOptions{
+		Context: context.WithValue(context.Background(), pOptionsKey, bopts),
+	}
+	for _, o := range opts {
+		o(&options)
+	}
+
 	body, _ := r.opts.Codec.Marshal(m)
 	mqProducer := r.client.GetProducer(r.bopts.instanceId, topic)
 
 	var msg mq_http_sdk.PublishMessageRequest
 	msg = mq_http_sdk.PublishMessageRequest{
-		MessageTag:  "go-micro",          // 消息标签
+		MessageTag:  bopts.tag,           // 消息标签
 		MessageBody: string(body),        // 消息内容
 		Properties:  map[string]string{}, // 消息属性
 	}
 
+	fmt.Println(bopts.tag)
 	ret, err := mqProducer.PublishMessage(msg)
 	if err != nil {
 		fmt.Println(err)
@@ -167,8 +177,13 @@ func (r *rBroker) Publish(topic string, m *broker.Message, opts ...broker.Publis
 
 func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker.SubscribeOption) (broker.Subscriber,
 	error) {
+	bopts := &sBrokerOptions{
+		groupId: DefaultKeyValue,
+		subTag:  DefaultKeyValue,
+	}
 	options := broker.SubscribeOptions{
 		AutoAck: true,
+		Context: context.WithValue(context.Background(), sOptionsKey, bopts),
 	}
 	for _, o := range opts {
 		o(&options)
@@ -178,14 +193,95 @@ func (r *rBroker) Subscribe(topic string, handler broker.Handler, opts ...broker
 		topic:  topic,
 		handle: handler,
 		opts:   options,
+		bopts:  bopts,
 	}
-	go r.recv(topic, handler, s)
+	if len(s.bopts.groupId) == 0 {
+		fmt.Println("err groupId")
+		return nil, err("groupId")
+	}
+	fmt.Println(s.bopts.groupId)
+	fmt.Println(s.bopts.subTag)
+	//go r.recv(topic, handler, *s)
+	consume := r.client.GetConsumer(r.bopts.instanceId, topic, s.bopts.groupId, s.bopts.subTag)
+	go func() {
+
+
+		for {
+			endChan := make(chan int)
+			respChan := make(chan mq_http_sdk.ConsumeMessageResponse)
+			errChan := make(chan error)
+			go func() {
+				select {
+				case resp := <-respChan:
+					{
+						// 处理业务逻辑
+
+						var handles []string
+						var body string
+
+						fmt.Printf("Consume %d messages---->\n", len(resp.Messages))
+
+						for _, v := range resp.Messages {
+							body = v.MessageBody
+							handles = append(handles, v.ReceiptHandle)
+
+							var rst *broker.Message
+							_ = r.opts.Codec.Unmarshal([]byte(body), &rst)
+
+							p := &publication{
+								c:       consume,
+								topic:   topic,
+								message: rst,
+								handles: handles,
+							}
+
+							p.err = handler(p)
+
+							if p.err != nil {
+								fmt.Printf("p.err:%v", p.err)
+								break
+							}
+							if s.opts.AutoAck {
+								_ = p.Ack()
+							}
+
+						}
+						endChan <- 1
+					}
+				case err := <-errChan:
+					{
+						// 没有消息
+						if strings.Contains(err.(gerr.ErrCode).Error(), "MessageNotExist") {
+							fmt.Println("\nNo new message, continue!")
+						} else {
+							fmt.Println(err)
+							time.Sleep(time.Duration(3) * time.Second)
+						}
+						endChan <- 1
+					}
+				case <-time.After(35 * time.Second):
+					{
+						fmt.Println("Timeout of consumer message ??")
+						endChan <- 1
+					}
+				}
+			}()
+
+			// 长轮询消费消息
+			// 长轮询表示如果topic没有消息则请求会在服务端挂住3s，3s内如果有消息可以消费则立即返回
+			consume.ConsumeMessage(respChan, errChan,
+				5, // 一次最多消费3条(最多可设置为16条)
+				3, // 长轮询时间3秒（最多可设置为30秒）
+			)
+			<-endChan
+		}
+	}()
 	return s, nil
 }
 
-func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
+func (r *rBroker) recv(topic string, handler broker.Handler, s subscriber) {
 
-	consume := r.client.GetConsumer(r.bopts.instanceId, topic, r.bopts.groupId, "")
+	consume := r.client.GetConsumer(r.bopts.instanceId, topic, s.bopts.groupId, s.bopts.subTag)
 
 	for {
 		endChan := make(chan int)
@@ -251,8 +347,8 @@ func (r *rBroker) recv(topic string, handler broker.Handler, s *subscriber) {
 		// 长轮询消费消息
 		// 长轮询表示如果topic没有消息则请求会在服务端挂住3s，3s内如果有消息可以消费则立即返回
 		consume.ConsumeMessage(respChan, errChan,
-			10, // 一次最多消费3条(最多可设置为16条)
-			10, // 长轮询时间3秒（最多可设置为30秒）
+			5, // 一次最多消费3条(最多可设置为16条)
+			3, // 长轮询时间3秒（最多可设置为30秒）
 		)
 		<-endChan
 	}

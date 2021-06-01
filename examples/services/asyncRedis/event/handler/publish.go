@@ -5,7 +5,6 @@ import (
 	"github.com/asim/go-micro/v3/broker"
 	"github.com/lidaqi001/micro/examples/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
-	"github.com/lidaqi001/micro/plugins/broker/rocketmq"
 	"log"
 )
 
@@ -31,7 +30,7 @@ func (s *DemoServiceHandler) publishSayHello(req string) error {
 			"id": req,
 		},
 		Body: body,
-	}, rocketmq.Tag("b")); err != nil {
+	}); err != nil {
 		log.Printf("[pub] failed: %v", err)
 	}
 

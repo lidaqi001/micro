@@ -6,7 +6,7 @@
 
 - 使异步消息在更稳定的消息队列中运行
 
-- 问题也是有的：
+### 问题：
     
 ```text
 使用指定broker驱动后，micro.WrapSubscriber() 函数不生效

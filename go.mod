@@ -5,7 +5,8 @@ go 1.16
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
-	github.com/aliyunmq/mq-http-go-sdk v1.0.3 // indirect
+	github.com/aliyunmq/mq-http-go-sdk v1.0.3
+	github.com/asim/go-micro/plugins/broker/redis/v3 v3.0.0-20210601052333-ca2014bf8e50 // indirect
 	github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
@@ -17,13 +18,12 @@ require (
 	github.com/facebookgo/stack v0.0.0-20160209184415-751773369052 // indirect
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
-	github.com/gogap/errors v0.0.0-20200228125012-531a6449b28c // indirect
+	github.com/gogap/errors v0.0.0-20200228125012-531a6449b28c
 	github.com/gogap/stack v0.0.0-20150131034635-fef68dddd4f8 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441
 	github.com/leodido/go-urn v1.2.1 // indirect
-	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601060020-d18518aed260 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/uber/jaeger-client-go v2.27.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
