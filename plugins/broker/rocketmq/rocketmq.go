@@ -154,10 +154,6 @@ func (r *rBroker) Publish(topic string, m *broker.Message, opts ...broker.Publis
 		MessageBody: string(body),        // 消息内容
 		Properties:  map[string]string{}, // 消息属性
 	}
-	// 设置KEY
-	//msg.MessageKey = "MessageKey"
-	// 设置属性
-	//msg.Properties["a"] = "test properties"
 
 	ret, err := mqProducer.PublishMessage(msg)
 	if err != nil {
