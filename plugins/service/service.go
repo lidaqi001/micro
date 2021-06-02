@@ -1,11 +1,13 @@
 package service
 
 import (
+	"github.com/asim/go-micro/plugins/logger/zerolog/v3"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
 	"github.com/lidaqi001/micro/common/helper"
@@ -13,9 +15,11 @@ import (
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
 	"log"
+	"os"
 )
 
 func Create(serviceName string, registerService func(service micro.Service), opts ...micro.Option) {
+	logger.DefaultLogger = zerolog.NewLogger(logger.WithOutput(os.Stdout), logger.WithLevel(logger.DebugLevel))
 
 	// 初始化全局服务追踪
 	t, io, err := jaeger.NewTracer(serviceName)
@@ -34,14 +38,15 @@ func Create(serviceName string, registerService func(service micro.Service), opt
 		// 服务名称
 		micro.Name(serviceName),
 		// 服务注册
-		micro.Registry(etcd.NewRegistry(
-			registry.Addrs(helper.GetRegistryAddress()),
-		)),
+		micro.Registry(etcd.NewRegistry(registry.Addrs(helper.GetRegistryAddress()))),
 		// wrap handler
 		micro.WrapHandler(
 			// 基于ratelimit 限流
 			ratelimiter.NewHandlerWrapper(
-				ratelimit.NewBucketWithRate(helper.GetQPS()), false),
+				ratelimit.NewBucketWithRate(helper.GetQPS()), false,
+			),
+		),
+		micro.WrapHandler(
 			// 基于 jaeger 采集追踪数据
 			// handler 调用服务-链路追踪
 			traceplugin.NewHandlerWrapper(t),
@@ -49,11 +54,11 @@ func Create(serviceName string, registerService func(service micro.Service), opt
 		),
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
-		// ！！！目前对于自定义的rocketmq不生效！！！
-		micro.WrapSubscriber(
-			traceplugin.NewSubscriberWrapper(t),
-			trace.SubWrapper,
-		),
+		// ！！！目前对于自定义的驱动不生效！！！
+		//micro.WrapSubscriber(
+		//	traceplugin.NewSubscriberWrapper(t),
+		//	trace.SubWrapper,
+		//),
 	)
 
 	// 初始化，会解析命令行参数
