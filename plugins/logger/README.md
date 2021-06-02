@@ -4,7 +4,7 @@
 
 - 基于原logger组件接口编写，兼容原组件
 
-- 原组件设置需要环境变量为：**Development** 时，才会显示debug的消息，不够灵活，重写一下
+- 原组件需要设置Option为：**Development** 时，才会显示debug的消息，不够灵活，重写一下
 
 
 ```go
