@@ -7,9 +7,11 @@ import (
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
+	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	"github.com/lidaqi001/micro/examples/config"
+	logg "github.com/lidaqi001/micro/plugins/logger"
 	hystrix "github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"log"
@@ -32,6 +34,12 @@ var DefaultHystrixService = []string{
 }
 
 func Create(params Params) (interface{}, error) {
+	logger.DefaultLogger = logg.NewLogger(
+		// 日志目录
+		logg.OutputFilePath(config.LOG_DEFAULT_CLIENT),
+		// 日志根目录
+		logg.OutputRootPath(config.LOG_ROOT),
+	)
 
 	err := verifyParams(params)
 	if err != nil {

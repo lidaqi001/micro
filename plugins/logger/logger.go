@@ -22,7 +22,7 @@ import (
 //	String() string
 //}
 
-var DefaultLogger logger.Logger = NewLogger("")
+var DefaultLogger logger.Logger = NewLogger()
 
 func Log(level logger.Level, v ...interface{}) {
 	DefaultLogger.Log(level, v...)

@@ -1,7 +1,6 @@
 package service
 
 import (
-	"github.com/asim/go-micro/plugins/logger/zerolog/v3"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
@@ -10,16 +9,22 @@ import (
 	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
+	logg "github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
 	"log"
-	"os"
 )
 
 func Create(serviceName string, registerService func(service micro.Service), opts ...micro.Option) {
-	logger.DefaultLogger = zerolog.NewLogger(logger.WithOutput(os.Stdout), logger.WithLevel(logger.DebugLevel))
+	logger.DefaultLogger = logg.NewLogger(
+		// 日志目录
+		logg.OutputFilePath(config.LOG_DEFAULT_SERVICE),
+		// 日志根目录
+		logg.OutputRootPath(config.LOG_ROOT),
+	)
 
 	// 初始化全局服务追踪
 	t, io, err := jaeger.NewTracer(serviceName)
