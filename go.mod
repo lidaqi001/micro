@@ -5,9 +5,11 @@ go 1.16
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.1.0 // indirect
 	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
+	github.com/asim/go-micro/plugins/broker/kafka/v3 v3.0.0-20210603060126-ed44e9acc35d
+	github.com/asim/go-micro/plugins/broker/rabbitmq/v3 v3.0.0-20210604091730-a1e9b88495a1
 	github.com/asim/go-micro/plugins/broker/redis/v3 v3.0.0-20210601052333-ca2014bf8e50
 	github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
-	github.com/asim/go-micro/plugins/logger/zerolog/v3 v3.0.0-20210601052333-ca2014bf8e50 // indirect
+	github.com/asim/go-micro/plugins/logger/zerolog/v3 v3.0.0-20210601052333-ca2014bf8e50
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb
@@ -27,7 +29,6 @@ require (
 	github.com/uber/jaeger-client-go v2.27.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/ugorji/go v1.2.5 // indirect
-	github.com/zenazn/goji v0.9.0 // indirect
 	google.golang.org/grpc/examples v0.0.0-20210422002751-6f35bbbfb82d // indirect
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
