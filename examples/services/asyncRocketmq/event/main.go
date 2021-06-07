@@ -6,12 +6,12 @@ import (
 	"github.com/lidaqi001/micro/examples/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/examples/services/asyncRocketmq/event/handler"
-	"github.com/lidaqi001/micro/plugins/asyncRocketmq"
+	"github.com/lidaqi001/micro/plugins/rocketmqPack"
 )
 
 func main() {
-	asyncRocketmq.Create(
-		config.SERVICE_ASYNC_EVENT_ROCKETMQ,
+	rocketmqPack.Create(
+		config.SERVICE_ASYNC_EVENT,
 		func(service micro.Service, pbsb broker.Broker) {
 			// 注册处理函数
 			_ = user.RegisterDemoServiceHandler(

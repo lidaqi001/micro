@@ -13,7 +13,6 @@ const (
 	ROCKETMQ_ENDPOINT      = ""
 	ROCKETMQ_GROUP_ID      = ""
 
-
 	/*******************************************************
 						限流配置
 	*******************************************************/
@@ -40,12 +39,6 @@ const (
 	// 异步消息服务-订阅
 	SERVICE_ASYNC_SUBSCRIBER = "async_subscriber"
 
-	// 异步消息服务-事件-rocketmq
-	SERVICE_ASYNC_EVENT_ROCKETMQ = "async_event_rocketmq"
-
-	// 异步消息服务-订阅-rocketmq
-	SERVICE_ASYNC_SUBSCRIBER_ROCKETMQ = "async_subscriber_rocketmq"
-
 	/*******************************************************
 						链路追踪配置
 	*******************************************************/
@@ -59,4 +52,7 @@ const (
 
 	// 服务注册中心地址
 	REGISTRY_ADDR = "127.0.0.1:2379"
+
+	EVENT_A = "callSing"
+	EVENT_B = "singEven2t"
 )

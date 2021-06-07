@@ -6,12 +6,11 @@ import (
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
+	"github.com/lidaqi001/micro/common"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	logg "github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
@@ -19,12 +18,7 @@ import (
 )
 
 func Create(serviceName string, registerService func(service micro.Service), opts ...micro.Option) {
-	logger.DefaultLogger = logg.NewLogger(
-		// 日志目录
-		logg.OutputFilePath(config.LOG_DEFAULT_SERVICE),
-		// 日志根目录
-		logg.OutputRootPath(config.LOG_ROOT),
-	)
+	common.SetDefaultLoggerForZerolog(config.LOG_DEFAULT_SERVICE)
 
 	// 初始化全局服务追踪
 	t, io, err := jaeger.NewTracer(serviceName)
@@ -60,10 +54,10 @@ func Create(serviceName string, registerService func(service micro.Service), opt
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
 		// ！！！目前对于自定义的驱动不生效！！！
-		//micro.WrapSubscriber(
-		//	traceplugin.NewSubscriberWrapper(t),
-		//	trace.SubWrapper,
-		//),
+		micro.WrapSubscriber(
+			traceplugin.NewSubscriberWrapper(t),
+			trace.SubWrapper,
+		),
 	)
 
 	// 初始化，会解析命令行参数

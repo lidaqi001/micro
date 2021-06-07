@@ -7,11 +7,10 @@ import (
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
+	"github.com/lidaqi001/micro/common"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	logg "github.com/lidaqi001/micro/plugins/logger"
 	hystrix "github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"log"
@@ -28,18 +27,13 @@ type Params struct {
 
 // 应用自定义hystrix服务治理的服务列表
 var DefaultHystrixService = []string{
-	config.SERVICE_SING + ".DemoService.SayHello",
-	config.SERVICE_SPEAK + ".DemoService.SayHello",
-	config.SERVICE_LISTEN + ".DemoService.SayHello",
+	//config.SERVICE_SING + ".DemoService.SayHello",
+	//config.SERVICE_SPEAK + ".DemoService.SayHello",
+	//config.SERVICE_LISTEN + ".DemoService.SayHello",
 }
 
 func Create(params Params) (interface{}, error) {
-	logger.DefaultLogger = logg.NewLogger(
-		// 日志目录
-		logg.OutputFilePath(config.LOG_DEFAULT_CLIENT),
-		// 日志根目录
-		logg.OutputRootPath(config.LOG_ROOT),
-	)
+	common.SetDefaultLoggerForZerolog(config.LOG_DEFAULT_CLIENT)
 
 	err := verifyParams(params)
 	if err != nil {

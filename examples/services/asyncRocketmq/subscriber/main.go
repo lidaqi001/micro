@@ -7,13 +7,13 @@ import (
 	"github.com/lidaqi001/micro/common/helper"
 	c "github.com/lidaqi001/micro/examples/config"
 	"github.com/lidaqi001/micro/examples/services/asyncRocketmq/subscriber/handler"
-	"github.com/lidaqi001/micro/plugins/asyncRocketmq"
 	"github.com/lidaqi001/micro/plugins/broker/rocketmq"
+	"github.com/lidaqi001/micro/plugins/rocketmqPack"
 )
 
 func main() {
-	asyncRocketmq.Create(
-		c.SERVICE_ASYNC_SUBSCRIBER_ROCKETMQ,
+	rocketmqPack.Create(
+		c.SERVICE_ASYNC_SUBSCRIBER,
 		func(service micro.Service, pbsb broker.Broker) {
 
 			c2 := []broker.SubscribeOption{

@@ -1,10 +1,14 @@
 package helper
 
 import (
-	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/common/config"
 	"os"
 	"strconv"
 )
+
+/*******************************************************
+						获取配置
+*******************************************************/
 
 // 获取注册中心地址
 func GetRegistryAddress() string {

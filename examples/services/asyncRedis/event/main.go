@@ -34,5 +34,6 @@ func main() {
 
 	}, micro.Broker(
 		// 设置 rocketmq 作为 broker 驱动
-		redis.NewBroker()))
+		redis.NewBroker()),
+	)
 }
