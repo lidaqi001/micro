@@ -32,4 +32,6 @@ require (
 	google.golang.org/grpc/examples v0.0.0-20210422002751-6f35bbbfb82d // indirect
 	google.golang.org/protobuf v1.26.0
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	gorm.io/driver/mysql v1.1.0
+	gorm.io/gorm v1.21.10
 )
