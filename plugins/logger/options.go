@@ -32,6 +32,14 @@ type Options struct {
 	OutputFilePath string
 	// Output root path
 	OutputRootPath string
+	// Split the log by the hour
+	SplitLogByHour bool
+}
+
+type splitLogByHourKey struct{}
+
+func SplitLogByHour() logger.Option {
+	return logger.SetOption(splitLogByHourKey{}, true)
 }
 
 type rootPathKey struct{}

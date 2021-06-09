@@ -14,6 +14,8 @@ func main() {
 		log.OutputFilePath("test"),
 		// 日志根目录
 		log.OutputRootPath(config.LOG_ROOT),
+		// 以小时分割日志
+		log.SplitLogByHour(),
 	)
 
 	msg := "test log message~"

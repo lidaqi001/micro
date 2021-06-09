@@ -69,6 +69,9 @@ func (l *zlog) Init(opts ...logger.Option) error {
 	if rootPath, ok := l.opts.Context.Value(rootPathKey{}).(string); ok {
 		l.opts.OutputRootPath = rootPath
 	}
+	if byHour, ok := l.opts.Context.Value(splitLogByHourKey{}).(bool); ok && byHour {
+		l.opts.SplitLogByHour = byHour
+	}
 
 	// RESET
 	zerolog.TimeFieldFormat = time.RFC3339
@@ -143,6 +146,8 @@ func NewLogger(opts ...logger.Option) logger.Logger {
 		Mode:           Production,
 		ExitFunc:       os.Exit,
 		OutputFilePath: "",
+		SplitLogByHour: false,
+		SplitLogByDay:  false,
 	}
 
 	l := &zlog{opts: options}
@@ -180,8 +185,16 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 		logPath = ORootPath + filePath
 	)
 
-	// 以天为目录，小时为文件名，切割日志
-	logPath += "/" + date
+	var path string
+	if opts.SplitLogByHour {
+		// 以小时分割日志
+		// 以日期作为文件夹名，小时作为文件名
+		logPath += "/" + date
+		path = fmt.Sprintf("%s/%d.log", logPath, time.Now().Hour())
+	} else {
+		// (默认) 以日期分割日志
+		path = fmt.Sprintf("%s/%s.log", logPath, date)
+	}
 
 	// 检测路径，不存在就新增
 	if !helper.IsExist(logPath) {
@@ -190,7 +203,7 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 			return zerolog.Logger{}, err
 		}
 	}
-	path := fmt.Sprintf("%s/%d.log", logPath, time.Now().Hour())
+
 	file, err = os.OpenFile(path, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 
 	// f || os.Stdout
