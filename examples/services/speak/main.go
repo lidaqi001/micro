@@ -9,10 +9,11 @@ import (
 )
 
 func main() {
-	service.Create(
-		config.SERVICE_SPEAK,
-		func(service micro.Service) {
+	_ = service.Create(
+		service.Name(config.SERVICE_SPEAK),
+		service.CallFunc(func(service micro.Service) {
 			// 注册处理函数
-			user.RegisterDemoServiceHandler(service.Server(), new(handler.DemoServiceHandler))
-		})
+			_ = user.RegisterDemoServiceHandler(service.Server(), new(handler.DemoServiceHandler))
+		}),
+	)
 }

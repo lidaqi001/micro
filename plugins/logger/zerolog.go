@@ -4,9 +4,10 @@ import (
 	"context"
 	"fmt"
 	"github.com/asim/go-micro/v3/logger"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/rs/zerolog"
-	zelog "github.com/rs/zerolog/log"
+	zloglog "github.com/rs/zerolog/log"
 	"os"
 	"time"
 )
@@ -16,18 +17,18 @@ type zlog struct {
 	opts Options
 }
 
-func (l *zlog) Log(level logger.Level, v ...interface{}) {
+func (l *zlog) Log(level Level, v ...interface{}) {
 	l.log.WithLevel(loggerToZerologLevel(level)).Msg(fmt.Sprint(v...))
 	// Invoke os.Exit because unlike zerolog.Logger.Fatal zerolog.Logger.WithLevel won't stop the execution.
-	if level == logger.FatalLevel {
+	if level == FatalLevel {
 		l.opts.ExitFunc(1)
 	}
 }
 
-func (l *zlog) Logf(level logger.Level, format string, v ...interface{}) {
+func (l *zlog) Logf(level Level, format string, v ...interface{}) {
 	l.log.WithLevel(loggerToZerologLevel(level)).Msgf(format, v...)
 	// Invoke os.Exit because unlike zerolog.Logger.Fatal zerolog.Logger.WithLevel won't stop the execution.
-	if level == logger.FatalLevel {
+	if level == FatalLevel {
 		l.opts.ExitFunc(1)
 	}
 }
@@ -36,9 +37,9 @@ func (l *zlog) String() string {
 	return "zerolog"
 }
 
-func (l *zlog) Init(opts ...logger.Option) error {
+func (l *zlog) Init(opts ...Option) error {
 	for _, o := range opts {
-		o(&l.opts.Options)
+		o(&l.opts)
 	}
 
 	if hs, ok := l.opts.Context.Value(hooksKey{}).([]zerolog.Hook); ok {
@@ -85,7 +86,7 @@ func (l *zlog) Init(opts ...logger.Option) error {
 
 	// Set Log
 	var err error
-	if l.log, err = getZlog(l.opts); err != nil {
+	if l.log, err = l.getZerolog(); err != nil {
 		return err
 	}
 
@@ -117,37 +118,35 @@ func (l *zlog) Init(opts ...logger.Option) error {
 
 	// Also set it as zerolog's Default logger
 	if l.opts.UseAsDefault {
-		zelog.Logger = l.log
+		zloglog.Logger = l.log
 	}
 
 	return nil
 }
 
-func (l *zlog) Options() logger.Options {
-	return l.opts.Options
+func (l *zlog) Options() Options {
+	return l.opts
 }
 
-func (l *zlog) Fields(fields map[string]interface{}) logger.Logger {
+func (l *zlog) Fields(fields map[string]interface{}) Logger {
 	panic("implement me")
 }
 
 // NewLogger builds a new logger based on options
-func NewLogger(opts ...logger.Option) logger.Logger {
+func NewLogger(opts ...Option) Logger {
 	// Default options
 	options := Options{
-		Options: logger.Options{
-			Level:   100,
-			Fields:  make(map[string]interface{}),
-			Out:     os.Stderr,
-			Context: context.Background(),
-		},
+		Level:   100,
+		Fields:  make(map[string]interface{}),
+		Out:     os.Stderr,
+		Context: context.Background(),
+
 		ReportCaller:   false,
 		UseAsDefault:   false,
 		Mode:           Production,
 		ExitFunc:       os.Exit,
 		OutputFilePath: "",
 		SplitLogByHour: false,
-		SplitLogByDay:  false,
 	}
 
 	l := &zlog{opts: options}
@@ -158,14 +157,13 @@ func NewLogger(opts ...logger.Option) logger.Logger {
 //FORMAT Date
 const FORMAT = "20060102"
 
-// Output to the root path
-var ORootPath = "./log/"
+func (l *zlog) getZerolog() (zerolog.Logger, error) {
 
-func getZlog(opts Options) (zerolog.Logger, error) {
-
-	var log zerolog.Logger
-
-	filePath := opts.OutputFilePath
+	var (
+		log      zerolog.Logger
+		opts     = l.opts
+		filePath = opts.OutputFilePath
+	)
 
 	// If the filePath is not set , default output to os.Stdout
 	if len(filePath) == 0 {
@@ -173,8 +171,10 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 		return log, nil
 	}
 
+	// Output to the default root path
+	var default_root_path = config.LOG_ROOT
 	if len(opts.OutputRootPath) > 0 {
-		ORootPath = opts.OutputRootPath
+		default_root_path = opts.OutputRootPath
 	}
 
 	var (
@@ -182,7 +182,7 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 		file *os.File
 
 		date    = time.Now().Format(FORMAT)
-		logPath = ORootPath + filePath
+		logPath = default_root_path + filePath
 	)
 
 	var path string
@@ -192,7 +192,7 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 		logPath += "/" + date
 		path = fmt.Sprintf("%s/%d.log", logPath, time.Now().Hour())
 	} else {
-		// (默认) 以日期分割日志
+		// (默认) 以天分割日志
 		path = fmt.Sprintf("%s/%s.log", logPath, date)
 	}
 
@@ -200,6 +200,7 @@ func getZlog(opts Options) (zerolog.Logger, error) {
 	if !helper.IsExist(logPath) {
 		err = helper.CreateDir(logPath)
 		if err != nil {
+			logger.Error("log CreateDir err: ", err)
 			return zerolog.Logger{}, err
 		}
 	}

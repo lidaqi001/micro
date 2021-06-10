@@ -8,48 +8,38 @@ import (
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/juju/ratelimit"
-	"github.com/lidaqi001/micro/common"
-	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	log "github.com/lidaqi001/micro/plugins/logger"
+	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
-	"os"
 )
 
 type service struct {
 	opts Options
 }
 
-func Create(opts ...Option) {
+func Create(opts ...Option) error {
 	options := Options{
-		Context:     context.Background(),
-		ServiceName: "",
-		Init:        nil,
-		CallFunc:    nil,
+		Name:     "",
+		Init:     nil,
+		CallFunc: nil,
+		Context:  context.Background(),
 	}
-	service := &service{opts: options}
-	service.Init(opts...)
+	s := &service{opts: options}
+	return s.Init(opts...)
 }
 
-func (s *service) Init(opts ...Option) {
+func (s *service) Init(opts ...Option) error {
 
-	logger.DefaultLogger = log.NewLogger(
-		// 日志目录
-		log.OutputFilePath(config.LOG_DEFAULT_SERVICE),
-		// 日志根目录
-		log.OutputRootPath(config.LOG_ROOT),
-	)
-	//common.SetDefaultLoggerForZerolog(config.LOG_DEFAULT_SERVICE)
 	for _, o := range opts {
 		o(&s.opts)
 	}
+
 	if name, ok := s.opts.Context.Value(serviceNameKey{}).(string); ok {
-		s.opts.ServiceName = name
+		s.opts.Name = name
 	}
 	if init, ok := s.opts.Context.Value(initKey{}).([]micro.Option); ok {
 		s.opts.Init = init
@@ -59,24 +49,29 @@ func (s *service) Init(opts ...Option) {
 	}
 
 	switch {
-	case helper.Empty(s.opts.ServiceName):
-		//logger.Fatal("The serviceName cannot be empty~")
-		logger.Error("The serviceName cannot be empty~")
-		logger.Debug("The serviceName cannot be empty~")
-		os.Exit(1)
+
+	case helper.Empty(s.opts.Name):
+		err := errors.New(SERVICE_NAME_IS_NULL)
+		logger.Error(err)
+		return err
+
 	case s.opts.CallFunc == nil:
-		logger.Fatal(errors.New("The CallFunc cannot be empty~"))
+		err := errors.New(CALL_FUNC_IS_NULL)
+		logger.Error(err)
+		return err
 	}
+
+	return s.run()
 }
 
-func (s *service) run() {
-
-	common.SetDefaultLoggerForZerolog(config.LOG_DEFAULT_SERVICE)
+func (s *service) run() error {
+	name := s.opts.Name
 
 	// 初始化全局服务追踪
-	t, io, err := jaeger.NewTracer(s.opts.ServiceName)
+	t, io, err := jaeger.NewTracer(name)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Error(err)
+		return err
 	}
 	defer io.Close()
 	// 设置为全局 tracer
@@ -88,7 +83,7 @@ func (s *service) run() {
 		// 使用grpc协议
 		micro.Server(grpc.NewServer()),
 		// 服务名称
-		micro.Name(s.opts.ServiceName),
+		micro.Name(name),
 		// 服务注册
 		micro.Registry(etcd.NewRegistry(registry.Addrs(helper.GetRegistryAddress()))),
 		// wrap handler
@@ -116,16 +111,14 @@ func (s *service) run() {
 	// 初始化，会解析命令行参数
 	service.Init(s.opts.Init...)
 
-	// 将broker设置为不限制ip，默认为127.0.0.1
-	//_ = service.Options().Broker.Init(
-	//	broker.Addrs("0.0.0.0:"),
-	//)
-
 	// 注册处理器，调用服务接口处理请求
 	s.opts.CallFunc(service)
 
 	// 启动服务
 	if err := service.Run(); err != nil {
-		logger.Fatal(err)
+		logger.Error(err)
+		return err
 	}
+
+	return nil
 }

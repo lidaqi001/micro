@@ -1,8 +1,9 @@
 package logger
 
 import (
-	"github.com/asim/go-micro/v3/logger"
+	"context"
 	"github.com/rs/zerolog"
+	"io"
 )
 
 type Mode uint8
@@ -12,8 +13,16 @@ const (
 	Development
 )
 
+type Option func(*Options)
+
 type Options struct {
-	logger.Options
+	// It's common to set this to a file, or leave it default which is `os.Stderr`
+	Out io.Writer
+	// The logging level the logger should log at. default is `InfoLevel`
+	Level Level
+	// fields to always be logged
+	Fields  map[string]interface{}
+	Context context.Context
 
 	// Flag for whether to log caller info (off by default)
 	ReportCaller bool
@@ -38,60 +47,60 @@ type Options struct {
 
 type splitLogByHourKey struct{}
 
-func SplitLogByHour() logger.Option {
-	return logger.SetOption(splitLogByHourKey{}, true)
+func SplitLogByHour() Option {
+	return SetOption(splitLogByHourKey{}, true)
 }
 
 type rootPathKey struct{}
 
-func OutputRootPath(rootPath string) logger.Option {
-	return logger.SetOption(rootPathKey{}, rootPath)
+func OutputRootPath(rootPath string) Option {
+	return SetOption(rootPathKey{}, rootPath)
 }
 
 type filePathKey struct{}
 
-func OutputFilePath(filename string) logger.Option {
-	return logger.SetOption(filePathKey{}, filename)
+func OutputFilePath(filename string) Option {
+	return SetOption(filePathKey{}, filename)
 }
 
 type reportCallerKey struct{}
 
-func ReportCaller() logger.Option {
-	return logger.SetOption(reportCallerKey{}, true)
+func ReportCaller() Option {
+	return SetOption(reportCallerKey{}, true)
 }
 
 type useAsDefaultKey struct{}
 
-func UseAsDefault() logger.Option {
-	return logger.SetOption(useAsDefaultKey{}, true)
+func UseAsDefault() Option {
+	return SetOption(useAsDefaultKey{}, true)
 }
 
 type developmentModeKey struct{}
 
-func WithDevelopmentMode() logger.Option {
-	return logger.SetOption(developmentModeKey{}, true)
+func WithDevelopmentMode() Option {
+	return SetOption(developmentModeKey{}, true)
 }
 
 type productionModeKey struct{}
 
-func WithProductionMode() logger.Option {
-	return logger.SetOption(productionModeKey{}, true)
+func WithProductionMode() Option {
+	return SetOption(productionModeKey{}, true)
 }
 
 type timeFormatKey struct{}
 
-func WithTimeFormat(timeFormat string) logger.Option {
-	return logger.SetOption(timeFormatKey{}, timeFormat)
+func WithTimeFormat(timeFormat string) Option {
+	return SetOption(timeFormatKey{}, timeFormat)
 }
 
 type hooksKey struct{}
 
-func WithHooks(hooks []zerolog.Hook) logger.Option {
-	return logger.SetOption(hooksKey{}, hooks)
+func WithHooks(hooks []zerolog.Hook) Option {
+	return SetOption(hooksKey{}, hooks)
 }
 
 type exitKey struct{}
 
-func WithExitFunc(exit func(int)) logger.Option {
-	return logger.SetOption(exitKey{}, exit)
+func WithExitFunc(exit func(int)) Option {
+	return SetOption(exitKey{}, exit)
 }

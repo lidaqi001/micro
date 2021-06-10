@@ -9,12 +9,13 @@ import (
 )
 
 func main() {
-	service.Create(
-		config.SERVICE_ASYNC_EVENT,
-		func(service micro.Service) {
+	_ = service.Create(
+		service.Name(config.SERVICE_ASYNC_EVENT),
+		service.CallFunc(func(service micro.Service) {
 			// 注册处理函数
 			_ = user.RegisterDemoServiceHandler(
 				service.Server(), &handler.DemoServiceHandler{Service: service},
 			)
-		})
+		}),
+	)
 }

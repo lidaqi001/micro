@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"github.com/asim/go-micro/v3"
-	"log"
-	"reflect"
 	"github.com/lidaqi001/micro/examples/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/plugins/client"
+	"log"
+	"reflect"
 )
 
 func main() {
@@ -17,20 +17,35 @@ func main() {
 	input["b"] = "b"
 	input["c"] = "c"
 
-	params := client.Params{
-		ClientName: "client.1",
-		Input:      input,
-		CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
+	//params := client.Params{
+	//	ClientName: "client.1",
+	//	Input:      input,
+	//	CallUserFunc: func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
+	//		// 业务代码处理
+	//		//i := input.(map[string]string)
+	//		//log.Printf("传参:::%v,%v", input, i["a"])
+	//
+	//		cli := user.NewDemoService(config.SERVICE_SING, svc.Client())
+	//		req := &user.DemoRequest{Name: "lidaqi"}
+	//		return cli.SayHello(ctx, req)
+	//	},
+	//}
+	//rsp, _ := client.Create(params)
+	rsp, _ := client.Create(
+		client.Name("client.1"),
+		client.Ctx(context.Background()),
+		client.Input(input),
+		client.CallFunc(func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
 			// 业务代码处理
 			//i := input.(map[string]string)
 			//log.Printf("传参:::%v,%v", input, i["a"])
 
 			cli := user.NewDemoService(config.SERVICE_SING, svc.Client())
-			req := &user.DemoRequest{Name: "李琪"}
+			req := &user.DemoRequest{Name: "lidaqi"}
 			return cli.SayHello(ctx, req)
-		},
-	}
-	rsp, _ := client.Create(params)
+		}),
+	)
+	//return
 
 	switch {
 	case reflect.ValueOf(rsp).IsNil():

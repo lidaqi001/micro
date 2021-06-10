@@ -6,7 +6,7 @@ import (
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
 	c "github.com/lidaqi001/micro/examples/config"
-	"github.com/lidaqi001/micro/examples/services/asyncRocketmq/subscriber/handler"
+	"github.com/lidaqi001/micro/examples/services/(discard)asyncRocketmq/subscriber/handler"
 	"github.com/lidaqi001/micro/plugins/broker/rocketmq"
 	"github.com/lidaqi001/micro/plugins/rocketmqPack"
 )

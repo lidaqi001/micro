@@ -3,18 +3,21 @@ package client
 import (
 	"context"
 	"errors"
+	hystrix2 "github.com/afex/hystrix-go/hystrix"
 	"github.com/asim/go-micro/plugins/client/grpc/v3"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
-	"github.com/lidaqi001/micro/common"
-	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
-	hystrix "github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
+	"github.com/lidaqi001/micro/plugins/logger"
+	"github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
-	"log"
 )
+
+type client struct {
+	opts Options
+}
 
 // Create params struct
 type Params struct {
@@ -32,32 +35,83 @@ var DefaultHystrixService = []string{
 	//config.SERVICE_LISTEN + ".DemoService.SayHello",
 }
 
-func Create(params Params) (interface{}, error) {
-	common.SetDefaultLoggerForZerolog(config.LOG_DEFAULT_CLIENT)
+func Create(opts ...Option) (interface{}, error) {
+	options := Options{
+		Name:     "",
+		Init:     nil,
+		CallFunc: nil,
+		Context:  context.Background(),
+	}
+	c := &client{opts: options}
+	return c.Init(opts...)
+}
 
-	err := verifyParams(params)
-	if err != nil {
+func (c client) Init(opts ...Option) (interface{}, error) {
+
+	for _, o := range opts {
+		o(&c.opts)
+	}
+
+	if ctx, ok := c.opts.Context.Value(ctxKey{}).(context.Context); ok {
+		c.opts.Ctx = ctx
+	}
+	if name, ok := c.opts.Context.Value(nameKey{}).(string); ok {
+		c.opts.Name = name
+	}
+	if input, ok := c.opts.Context.Value(inputKey{}).(interface{}); ok {
+		c.opts.Input = input
+	}
+	if h, ok := c.opts.Context.Value(hystrixKey{}).([]string); ok {
+		c.opts.Hystrix = h
+	}
+	if init, ok := c.opts.Context.Value(initKey{}).([]micro.Option); ok {
+		c.opts.Init = init
+	}
+	if fn, ok := c.opts.Context.Value(callFuncKey{}).(func(micro.Service, context.Context, interface{}) (interface{}, error)); ok {
+		c.opts.CallFunc = fn
+	}
+
+	switch {
+
+	case helper.Empty(c.opts.Name):
+		err := errors.New(NAME_IS_NULL)
+		logger.Error(err)
+		return nil, err
+
+	case c.opts.CallFunc == nil:
+		err := errors.New(CALL_FUNC_IS_NULL)
+		logger.Error(err)
 		return nil, err
 	}
 
-	if params.HystrixService != nil {
+	return c.run()
+}
+
+func (c client) run() (interface{}, error) {
+
+	if c.opts.Hystrix != nil {
 		// hystrix 配置（重试、降级、熔断）
-		hystrix.Configure(params.HystrixService)
+		hystrix.Configure(c.opts.Hystrix)
 	} else {
 		hystrix.Configure(DefaultHystrixService)
 	}
+	// 设置hystrix默认超时时间（单位：ms）
+	hystrix2.DefaultTimeout = 2000
 
-	ctx := params.Ctx
+	ctx := c.opts.Ctx
 	if ctx == nil {
 		// 当ctx || sp 为空时
 		// 初始化上下文和span
 		_, ctx = jaeger.GetTraceClientCtxAndSpan()
 	}
 
+	var name = c.opts.Name
+
 	// 设置trace server地址
-	t, io, err := jaeger.NewTracer(params.ClientName)
+	t, io, err := jaeger.NewTracer(name)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error(err)
+		return nil, err
 	}
 	defer io.Close()
 
@@ -66,7 +120,7 @@ func Create(params Params) (interface{}, error) {
 		// 使用grpc协议
 		micro.Client(grpc.NewClient()),
 		// 客户端名称
-		micro.Name(params.ClientName),
+		micro.Name(name),
 		// 服务发现
 		micro.Registry(etcd.NewRegistry(
 			registry.Addrs(helper.GetRegistryAddress()),
@@ -80,18 +134,8 @@ func Create(params Params) (interface{}, error) {
 	)
 
 	// 初始化
-	service.Init()
+	service.Init(c.opts.Init...)
 
 	// 执行客户端闭包，调用相应服务
-	return params.CallUserFunc(service, ctx, params.Input)
-}
-
-func verifyParams(params Params) error {
-	switch {
-	case helper.Empty(params.ClientName):
-		return errors.New("clientName can't be empty!")
-	case params.CallUserFunc == nil:
-		return errors.New("CallUserFunc can't be nil!")
-	}
-	return nil
+	return c.opts.CallFunc(service, ctx, c.opts.Input)
 }

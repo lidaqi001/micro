@@ -24,16 +24,4 @@ func main() {
 
 		},
 	)
-	//service.Create(
-	//
-	//	config.SERVICE_ASYNC_EVENT,
-	//	func(service micro.Service) {
-	//
-	//		// 注册处理函数
-	//		_ = user.RegisterDemoServiceHandler(
-	//			service.Server(), &handler.DemoServiceHandler{Service: service},
-	//		)
-	//
-	//	},
-	//)
 }

@@ -1,8 +1,8 @@
 package logger
 
 import (
-	"github.com/asim/go-micro/v3/logger"
 	"github.com/rs/zerolog"
+	"os"
 )
 
 // Level defines log levels.
@@ -71,21 +71,71 @@ func (l Level) String() string {
 	return ""
 }
 
-func loggerToZerologLevel(level logger.Level) zerolog.Level {
+func loggerToZerologLevel(level Level) zerolog.Level {
 	switch level {
-	case logger.TraceLevel:
+	case TraceLevel:
 		return zerolog.TraceLevel
-	case logger.DebugLevel:
+	case DebugLevel:
 		return zerolog.DebugLevel
-	case logger.InfoLevel:
+	case InfoLevel:
 		return zerolog.InfoLevel
-	case logger.WarnLevel:
+	case WarnLevel:
 		return zerolog.WarnLevel
-	case logger.ErrorLevel:
+	case ErrorLevel:
 		return zerolog.ErrorLevel
-	case logger.FatalLevel:
+	case FatalLevel:
 		return zerolog.FatalLevel
 	default:
 		return zerolog.InfoLevel
 	}
+}
+
+func Info(args ...interface{}) {
+	DefaultLogger.Log(InfoLevel, args...)
+}
+
+func Infof(template string, args ...interface{}) {
+	DefaultLogger.Logf(InfoLevel, template, args...)
+}
+
+func Trace(args ...interface{}) {
+	DefaultLogger.Log(TraceLevel, args...)
+}
+
+func Tracef(template string, args ...interface{}) {
+	DefaultLogger.Logf(TraceLevel, template, args...)
+}
+
+func Debug(args ...interface{}) {
+	DefaultLogger.Log(DebugLevel, args...)
+}
+
+func Debugf(template string, args ...interface{}) {
+	DefaultLogger.Logf(DebugLevel, template, args...)
+}
+
+func Warn(args ...interface{}) {
+	DefaultLogger.Log(WarnLevel, args...)
+}
+
+func Warnf(template string, args ...interface{}) {
+	DefaultLogger.Logf(WarnLevel, template, args...)
+}
+
+func Error(args ...interface{}) {
+	DefaultLogger.Log(ErrorLevel, args...)
+}
+
+func Errorf(template string, args ...interface{}) {
+	DefaultLogger.Logf(ErrorLevel, template, args...)
+}
+
+func Fatal(args ...interface{}) {
+	DefaultLogger.Log(FatalLevel, args...)
+	os.Exit(1)
+}
+
+func Fatalf(template string, args ...interface{}) {
+	DefaultLogger.Logf(FatalLevel, template, args...)
+	os.Exit(1)
 }

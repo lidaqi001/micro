@@ -21,7 +21,7 @@ func (h *handler) Client() gin.HandlerFunc {
 			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
 				// 业务代码处理
 				cli := user.NewDemoService(config.SERVICE_SING, srv.Client())
-				return cli.SayHello(ctx, &user.DemoRequest{Name: "李琪"})
+				return cli.SayHello(ctx, &user.DemoRequest{Name: "lidaqi"})
 			},
 		}
 		rsp, err = client.Create(params)

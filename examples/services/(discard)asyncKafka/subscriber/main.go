@@ -2,17 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/asim/go-micro/plugins/broker/redis/v3"
+	"github.com/asim/go-micro/plugins/broker/kafka/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/broker"
 	"github.com/lidaqi001/micro/examples/config"
-	"github.com/lidaqi001/micro/examples/services/asyncRedis/subscriber/handler"
+	"github.com/lidaqi001/micro/examples/services/(discard)asyncKafka/subscriber/handler"
 	"github.com/lidaqi001/micro/plugins/service"
 )
 
 func main() {
 	_ = service.Create(
-		service.Name(config.SERVICE_ASYNC_EVENT),
+		service.Name(config.SERVICE_ASYNC_SUBSCRIBER),
 		service.CallFunc(func(service micro.Service) {
 
 			pbsb := service.Options().Broker
@@ -34,8 +34,7 @@ func main() {
 		}),
 		service.Init([]micro.Option{
 			micro.Broker(
-				// 设置 rocketmq 作为 broker 驱动
-				redis.NewBroker(broker.Addrs("127.0.0.1:6379")),
+				kafka.NewBroker(),
 			),
 		}),
 	)

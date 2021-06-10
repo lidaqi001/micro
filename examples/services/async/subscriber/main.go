@@ -8,10 +8,11 @@ import (
 )
 
 func main() {
-	service.Create(
-		config.SERVICE_ASYNC_SUBSCRIBER,
-		func(service micro.Service) {
+	_ = service.Create(
+		service.Name(config.SERVICE_ASYNC_SUBSCRIBER),
+		service.CallFunc(func(service micro.Service) {
 			_ = micro.RegisterSubscriber("singEvent", service.Server(), handler.SingEvent)
 			_ = micro.RegisterSubscriber("singEvent", service.Server(), handler.CallSing)
-		})
+		}),
+	)
 }
