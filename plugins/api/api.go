@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lidaqi001/micro/examples/api/handler"
 	"github.com/lidaqi001/micro/examples/api/jwt"
@@ -21,7 +20,7 @@ func main() {
 		})
 	})
 
-	//jwt
+	// jwt
 	r.GET("/login/:username/:password", jwt.Login)
 	auth := r.Group("auth").Use(middleware.Auth())
 	{
@@ -30,8 +29,13 @@ func main() {
 		auth.GET("/sayHello", jwt.SayHello)
 	}
 
-	// 监听并在 0.0.0.0:8080 上启动服务
-	if err := r.Run(); err != nil {
-		fmt.Println("网关启动失败！错误：", err)
+	// 示例请求
+	call := r.Group("/call")
+	{
+		call.GET("/handler", h.Client())
+		call.GET("/asyncA", h.ClientAsyncA())
+		call.GET("/asyncB", h.ClientAsyncB())
 	}
+
+	r.Run() // 监听并在 0.0.0.0:8080 上启动服务
 }

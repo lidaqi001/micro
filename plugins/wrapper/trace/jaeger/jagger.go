@@ -54,7 +54,7 @@ func GetTraceClientCtxAndSpan() (opentracing.Span, context.Context) {
 	defer span.Finish()
 
 	// 注入 opentracing textmap 到空的上下文用于追踪
-	opentracing.GlobalTracer().Inject(span.Context(), opentracing.TextMap, opentracing.TextMapCarrier(md))
+	_ = opentracing.GlobalTracer().Inject(span.Context(), opentracing.TextMap, opentracing.TextMapCarrier(md))
 	ctx = opentracing.ContextWithSpan(ctx, span)
 	ctx = metadata.NewContext(ctx, md)
 

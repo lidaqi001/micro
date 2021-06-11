@@ -9,7 +9,6 @@ require (
 	github.com/asim/go-micro/plugins/broker/rabbitmq/v3 v3.0.0-20210604091730-a1e9b88495a1
 	github.com/asim/go-micro/plugins/broker/redis/v3 v3.0.0-20210601052333-ca2014bf8e50
 	github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
-	github.com/asim/go-micro/plugins/logger/zerolog/v3 v3.0.0-20210601052333-ca2014bf8e50
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb
@@ -26,6 +25,7 @@ require (
 	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601103936-8d9a4854d7dc
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rs/zerolog v1.22.0
+	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	github.com/uber/jaeger-client-go v2.27.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/ugorji/go v1.2.5 // indirect

@@ -52,17 +52,17 @@ func (c client) Init(opts ...Option) (interface{}, error) {
 		o(&c.opts)
 	}
 
-	if ctx, ok := c.opts.Context.Value(ctxKey{}).(context.Context); ok {
-		c.opts.Ctx = ctx
-	}
 	if name, ok := c.opts.Context.Value(nameKey{}).(string); ok {
 		c.opts.Name = name
 	}
-	if input, ok := c.opts.Context.Value(inputKey{}).(interface{}); ok {
-		c.opts.Input = input
-	}
 	if h, ok := c.opts.Context.Value(hystrixKey{}).([]string); ok {
 		c.opts.Hystrix = h
+	}
+	if ctx, ok := c.opts.Context.Value(ctxKey{}).(context.Context); ok {
+		c.opts.Ctx = ctx
+	}
+	if input, ok := c.opts.Context.Value(inputKey{}).(interface{}); ok {
+		c.opts.Input = input
 	}
 	if init, ok := c.opts.Context.Value(initKey{}).([]micro.Option); ok {
 		c.opts.Init = init
@@ -89,23 +89,26 @@ func (c client) Init(opts ...Option) (interface{}, error) {
 
 func (c client) run() (interface{}, error) {
 
+	var (
+		ctx  = c.opts.Ctx
+		name = c.opts.Name
+	)
+
+	// 设置hystrix默认超时时间（单位：ms）
+	hystrix2.DefaultTimeout = 2000
+
 	if c.opts.Hystrix != nil {
-		// hystrix 配置（重试、降级、熔断）
+		// hystrix 配置自定义服务（重试、降级、熔断）
 		hystrix.Configure(c.opts.Hystrix)
 	} else {
 		hystrix.Configure(DefaultHystrixService)
 	}
-	// 设置hystrix默认超时时间（单位：ms）
-	hystrix2.DefaultTimeout = 2000
 
-	ctx := c.opts.Ctx
-	if ctx == nil {
-		// 当ctx || sp 为空时
-		// 初始化上下文和span
-		_, ctx = jaeger.GetTraceClientCtxAndSpan()
-	}
-
-	var name = c.opts.Name
+	//if ctx == nil || ctx == context.Background() {
+	//	// 当 ctx==nil || ctx==context.Background() 时
+	//	// 初始化上下文和span
+	//	_, ctx = jaeger.GetTraceClientCtxAndSpan()
+	//}
 
 	// 设置trace server地址
 	t, io, err := jaeger.NewTracer(name)
@@ -129,8 +132,8 @@ func (c client) run() (interface{}, error) {
 		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(t)),
-		// wrap the client
-		//micro.WrapClient(logWrap.LogWrap),
+		// 自定义客户端中间件
+		//micro.WrapClient(log.LogWrap),
 	)
 
 	// 初始化

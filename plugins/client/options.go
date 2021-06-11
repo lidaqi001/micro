@@ -7,22 +7,21 @@ import (
 
 type Option func(opts *Options)
 
-//type Params struct {
-//	ClientName     string
-//	HystrixService []string
-//	CallUserFunc   func(micro.Service, context.Context, interface{}) (interface{}, error)
-//	Ctx            context.Context
-//	Input          interface{}
-//}
 type Options struct {
 	// use for client context set option
 	Context context.Context
 
-	Ctx      context.Context
+	// handler context
+	Ctx context.Context
+
+	// ps : []string{"sing.DemoService.SayHello"}
+	Hystrix []string
+
+	// CallFunc additional parameters
+	Input interface{}
+
 	Name     string
-	Hystrix  []string
 	Init     []micro.Option
-	Input    interface{}
 	CallFunc func(micro.Service, context.Context, interface{}) (interface{}, error)
 }
 

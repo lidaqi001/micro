@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/asim/go-micro/plugins/broker/redis/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/examples/services/asyncRedis/event/handler"
 	"github.com/lidaqi001/micro/plugins/service"

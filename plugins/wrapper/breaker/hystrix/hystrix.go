@@ -18,21 +18,24 @@ func (c *clientWrapper) Call(ctx context.Context, req client.Request, rsp interf
 	opts ...client.CallOption) error {
 
 	select {
+	
 	case <-ctx.Done():
-		// context（上下文）已结束
 
+		// context（上下文）已结束
 		log.Println("context already canceled！")
 		return errors.New("context already canceled！")
 
-
 	default:
+
 		// hystrix服务治理
 
 		return hystrix.Do(req.Service()+"."+req.Endpoint(), func() error {
+
 			// 服务重试
 
-			// 初始化retrier，每隔100ms重试一次，总共重试1次
-			// PS::: retrier.ConstantBackoff(1, 100*time.Millisecond)
+			// 初始化retrier
+			// 示例：每隔100ms重试一次，总共重试1次
+			// 示例代码: retrier.ConstantBackoff(1, 100*time.Millisecond)
 			// retrier 工作模式和 hystrix 类似，在 Run 方法中将待执行的业务逻辑封装到匿名函数传入即可
 			r := retrier.New(retrier.ConstantBackoff(0, 100*time.Millisecond), nil)
 			err := r.Run(func() error {
@@ -45,7 +48,7 @@ func (c *clientWrapper) Call(ctx context.Context, req client.Request, rsp interf
 
 			// 服务降级
 			// 你可以在这里自定义更复杂的服务降级逻辑作为服务熔断的兜底
-			log.Printf("hystrix fallback error: %v", err)
+			log.Printf("hystrix fallback: %v", err)
 			return err
 
 		})

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/plugins/client"
 )
@@ -12,20 +12,15 @@ import (
 func (h *handler) ClientAsyncA() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var (
-			rsp interface{}
-			err error
-		)
-		params := client.Params{
-			ClientName: "ginClientAsyncA",
-			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
+		rsp, err := client.Create(
+			client.Name("ginClientAsyncA"),
+			client.CallFunc(func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
 
 				// 业务代码处理
 				cli := user.NewDemoService(config.SERVICE_ASYNC_EVENT, srv.Client())
-				return cli.SayHello(ctx, &user.DemoRequest{Name: "ClientAsyncA"})
-			},
-		}
-		rsp, err = client.Create(params)
+				return cli.SayHelloByUserId(ctx, &user.UserRequest{Id: "ClientAsyncA"})
+			}),
+		)
 
 		code := 200
 		text := ""
@@ -43,20 +38,15 @@ func (h *handler) ClientAsyncA() gin.HandlerFunc {
 func (h *handler) ClientAsyncB() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var (
-			rsp interface{}
-			err error
-		)
-		params := client.Params{
-			ClientName: "ginClientAsyncB",
-			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
+		rsp, err := client.Create(
+			client.Name("ginClientAsyncB"),
+			client.CallFunc(func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
 
 				// 业务代码处理
 				cli := user.NewDemoService(config.SERVICE_ASYNC_EVENT, srv.Client())
-				return cli.SayHelloByUserId(ctx, &user.UserRequest{Id: "ClientAsyncB"})
-			},
-		}
-		rsp, err = client.Create(params)
+				return cli.SayHello(ctx, &user.DemoRequest{Name: "ClientAsyncB"})
+			}),
+		)
 
 		code := 200
 		text := ""

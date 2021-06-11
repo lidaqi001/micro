@@ -5,8 +5,8 @@ import (
 	"github.com/asim/go-micro/plugins/broker/kafka/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/broker"
-	"github.com/lidaqi001/micro/examples/config"
-	"github.com/lidaqi001/micro/examples/services/(discard)asyncKafka/subscriber/handler"
+	"github.com/lidaqi001/micro/common/config"
+	"github.com/lidaqi001/micro/examples/services/discard_asyncKafka/subscriber/handler"
 	"github.com/lidaqi001/micro/plugins/service"
 )
 

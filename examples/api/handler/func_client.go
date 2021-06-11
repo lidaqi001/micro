@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/asim/go-micro/v3"
 	"github.com/gin-gonic/gin"
-	"github.com/lidaqi001/micro/examples/config"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/plugins/client"
 )
@@ -12,19 +12,14 @@ import (
 func (h *handler) Client() gin.HandlerFunc {
 	return func(c *gin.Context) {
 
-		var (
-			rsp interface{}
-			err error
-		)
-		params := client.Params{
-			ClientName: "gin",
-			CallUserFunc: func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
+		rsp, err := client.Create(
+			client.Name("gin"),
+			client.CallFunc(func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
 				// 业务代码处理
 				cli := user.NewDemoService(config.SERVICE_SING, srv.Client())
 				return cli.SayHello(ctx, &user.DemoRequest{Name: "lidaqi"})
-			},
-		}
-		rsp, err = client.Create(params)
+			}),
+		)
 
 		code := 200
 		text := ""
