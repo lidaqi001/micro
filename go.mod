@@ -19,6 +19,7 @@ require (
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
+	github.com/google/uuid v1.1.5
 	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441
 	github.com/leodido/go-urn v1.2.1 // indirect
