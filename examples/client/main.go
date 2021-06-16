@@ -24,7 +24,7 @@ func main() {
 			//i := p.Input.(map[string]string)
 			//log.Printf("传参:::%v,%v", input, i["a"])
 
-			cli := user.NewDemoService(config.SERVICE_SPEAK, p.Service.Client())
+			cli := user.NewDemoService(config.SERVICE_SING, p.Service.Client())
 			req := &user.DemoRequest{Name: "lidaqi"}
 			return cli.SayHello(p.Ctx, req)
 		}),
