@@ -2,8 +2,7 @@ package handler
 
 import "github.com/gin-gonic/gin"
 
-type handler struct {
-}
+type handler struct{}
 
 type Handler interface {
 	WelCome() gin.HandlerFunc

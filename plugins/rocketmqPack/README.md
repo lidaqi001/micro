@@ -1,4 +1,4 @@
-# asyncRocketmq
+# asyncRocketmq（不可用）
 
 - 该方法是在 ***plugins/service/service.go*** 的基础上
 

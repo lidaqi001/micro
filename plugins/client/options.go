@@ -5,6 +5,12 @@ import (
 	"github.com/asim/go-micro/v3"
 )
 
+type CallFuncParams struct {
+	Ctx     context.Context
+	Service micro.Service
+	Input   interface{}
+}
+
 type Option func(opts *Options)
 
 type Options struct {
@@ -22,7 +28,7 @@ type Options struct {
 
 	Name     string
 	Init     []micro.Option
-	CallFunc func(micro.Service, context.Context, interface{}) (interface{}, error)
+	CallFunc func(CallFuncParams) (interface{}, error)
 }
 
 type ctxKey struct{}
@@ -52,6 +58,6 @@ func Init(options []micro.Option) Option {
 	return SetOption(initKey{}, options)
 }
 
-func CallFunc(fn func(micro.Service, context.Context, interface{}) (interface{}, error)) Option {
+func CallFunc(fn func(CallFuncParams) (interface{}, error)) Option {
 	return SetOption(callFuncKey{}, fn)
 }

@@ -19,22 +19,6 @@ type client struct {
 	opts Options
 }
 
-// Create params struct
-type Params struct {
-	ClientName     string
-	HystrixService []string
-	CallUserFunc   func(micro.Service, context.Context, interface{}) (interface{}, error)
-	Ctx            context.Context
-	Input          interface{}
-}
-
-// 应用自定义hystrix服务治理的服务列表
-var DefaultHystrixService = []string{
-	//config.SERVICE_SING + ".DemoService.SayHello",
-	//config.SERVICE_SPEAK + ".DemoService.SayHello",
-	//config.SERVICE_LISTEN + ".DemoService.SayHello",
-}
-
 func Create(opts ...Option) (interface{}, error) {
 	options := Options{
 		Name:     "",
@@ -52,23 +36,23 @@ func (c client) Init(opts ...Option) (interface{}, error) {
 		o(&c.opts)
 	}
 
-	if name, ok := c.opts.Context.Value(nameKey{}).(string); ok {
-		c.opts.Name = name
+	if val, ok := c.opts.Context.Value(nameKey{}).(string); ok {
+		c.opts.Name = val
 	}
-	if h, ok := c.opts.Context.Value(hystrixKey{}).([]string); ok {
-		c.opts.Hystrix = h
+	if val, ok := c.opts.Context.Value(hystrixKey{}).([]string); ok {
+		c.opts.Hystrix = val
 	}
-	if ctx, ok := c.opts.Context.Value(ctxKey{}).(context.Context); ok {
-		c.opts.Ctx = ctx
+	if val, ok := c.opts.Context.Value(ctxKey{}).(context.Context); ok {
+		c.opts.Ctx = val
 	}
-	if input, ok := c.opts.Context.Value(inputKey{}).(interface{}); ok {
-		c.opts.Input = input
+	if val, ok := c.opts.Context.Value(inputKey{}).(interface{}); ok {
+		c.opts.Input = val
 	}
-	if init, ok := c.opts.Context.Value(initKey{}).([]micro.Option); ok {
-		c.opts.Init = init
+	if val, ok := c.opts.Context.Value(initKey{}).([]micro.Option); ok {
+		c.opts.Init = val
 	}
-	if fn, ok := c.opts.Context.Value(callFuncKey{}).(func(micro.Service, context.Context, interface{}) (interface{}, error)); ok {
-		c.opts.CallFunc = fn
+	if val, ok := c.opts.Context.Value(callFuncKey{}).(func(CallFuncParams) (interface{}, error)); ok {
+		c.opts.CallFunc = val
 	}
 
 	switch {
@@ -100,8 +84,6 @@ func (c client) run() (interface{}, error) {
 	if c.opts.Hystrix != nil {
 		// hystrix 配置自定义服务（重试、降级、熔断）
 		hystrix.Configure(c.opts.Hystrix)
-	} else {
-		hystrix.Configure(DefaultHystrixService)
 	}
 
 	//if ctx == nil || ctx == context.Background() {
@@ -140,5 +122,10 @@ func (c client) run() (interface{}, error) {
 	service.Init(c.opts.Init...)
 
 	// 执行客户端闭包，调用相应服务
-	return c.opts.CallFunc(service, ctx, c.opts.Input)
+	return c.opts.CallFunc(CallFuncParams{
+		Ctx:     ctx,
+		Service: service,
+		Input:   c.opts.Input,
+	})
+
 }

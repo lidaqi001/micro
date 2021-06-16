@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"context"
-	"github.com/asim/go-micro/v3"
 	"github.com/gin-gonic/gin"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
@@ -14,10 +12,10 @@ func (h *handler) Client() gin.HandlerFunc {
 
 		rsp, err := client.Create(
 			client.Name("gin"),
-			client.CallFunc(func(srv micro.Service, ctx context.Context, i2 interface{}) (i interface{}, err error) {
+			client.CallFunc(func(p client.CallFuncParams) (i interface{}, err error) {
 				// 业务代码处理
-				cli := user.NewDemoService(config.SERVICE_SING, srv.Client())
-				return cli.SayHello(ctx, &user.DemoRequest{Name: "lidaqi"})
+				cli := user.NewDemoService(config.SERVICE_SING, p.Service.Client())
+				return cli.SayHello(p.Ctx, &user.DemoRequest{Name: "lidaqi"})
 			}),
 		)
 

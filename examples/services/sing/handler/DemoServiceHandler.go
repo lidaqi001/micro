@@ -2,9 +2,8 @@ package handler
 
 import (
 	"context"
-	"github.com/asim/go-micro/v3"
-	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/common/config"
+	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/plugins/client"
 	"log"
@@ -24,9 +23,9 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *user.DemoRequest
 	res, err := client.Create(
 		client.Ctx(ctx),
 		client.Name("client.2"),
-		client.CallFunc(func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
-			cli := user.NewDemoService(config.SERVICE_SPEAK, svc.Client())
-			return cli.SayHello(ctx, req)
+		client.CallFunc(func(p client.CallFuncParams) (interface{}, error) {
+			cli := user.NewDemoService(config.SERVICE_SPEAK, p.Service.Client())
+			return cli.SayHello(p.Ctx, req)
 		}),
 	)
 
@@ -36,9 +35,9 @@ func (s *DemoServiceHandler) SayHello(ctx context.Context, req *user.DemoRequest
 	res2, err := client.Create(
 		client.Ctx(ctx),
 		client.Name("client.2"),
-		client.CallFunc(func(svc micro.Service, ctx context.Context, input interface{}) (interface{}, error) {
-			cli := user.NewDemoService(config.SERVICE_LISTEN, svc.Client())
-			return cli.SayHello(ctx, req)
+		client.CallFunc(func(p client.CallFuncParams) (interface{}, error) {
+			cli := user.NewDemoService(config.SERVICE_LISTEN, p.Service.Client())
+			return cli.SayHello(p.Ctx, req)
 		}),
 	)
 	log.Printf("listen：%v", res2)

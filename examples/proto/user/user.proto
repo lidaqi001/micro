@@ -4,7 +4,8 @@
  * 示例微服务
  */
 syntax = "proto3";
-option go_package = "./proto";
+// 生成代码文件保存路径
+option go_package = "./user";
 
 /**
  * 处理演示服务的 RPC 接口

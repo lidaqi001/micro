@@ -1,4 +1,4 @@
-# rabbitmq驱动
+# rabbitmq驱动（可用）
 
 - 该方法是在 ***plugins/service/service.go*** 的基础上
 
