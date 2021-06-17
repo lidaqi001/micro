@@ -25,30 +25,30 @@ func NewSpan(ctx context.Context) Span {
 	return &span{span: sp}
 }
 
-func (s span) SetTopic(req interface{}) {
+func (s *span) SetTopic(req interface{}) {
 	s.span.SetTag("topic", req)
 }
 
-func (s span) SetHeader(hea interface{}) {
+func (s *span) SetHeader(hea interface{}) {
 	s.span.SetTag("header", hea)
 }
 
-func (s span) SetPayload(hea interface{}) {
+func (s *span) SetPayload(hea interface{}) {
 	s.span.SetTag("payload", hea)
 }
 
-func (s span) SetRequest(req interface{}) {
+func (s *span) SetRequest(req interface{}) {
 	s.span.SetTag("request", req)
 }
 
-func (s span) SetError(err interface{}) {
+func (s *span) SetError(err interface{}) {
 	if err != nil {
 		s.span.SetTag("err", err)
 	}
 	s.span.Finish()
 }
 
-func (s span) SetResponse(rsp interface{}, err error, opts ...bool) {
+func (s *span) SetResponse(rsp interface{}, err error, opts ...bool) {
 
 	s.span.SetTag("response", rsp)
 

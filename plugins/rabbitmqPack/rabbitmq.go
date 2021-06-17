@@ -54,8 +54,11 @@ func Create(serviceName string, registerService func(service micro.Service, pbsb
 }
 
 type Event struct {
-	Server server.Server
+	// Use for Publish
 	Client client.Client
+
+	// Use for Subscribe
+	Server server.Server
 }
 
 // 事件订阅

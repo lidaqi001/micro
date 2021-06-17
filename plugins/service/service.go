@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
@@ -28,8 +27,14 @@ func Create(opts ...Option) error {
 		CallFunc: nil,
 		Context:  context.Background(),
 	}
+
 	s := &service{opts: options}
-	return s.Init(opts...)
+
+	if err := s.Init(opts...); err != nil {
+		return err
+	}
+
+	return s.run()
 }
 
 func (s *service) Init(opts ...Option) error {
@@ -51,17 +56,14 @@ func (s *service) Init(opts ...Option) error {
 	switch {
 
 	case helper.Empty(s.opts.Name):
-		err := errors.New(SERVICE_NAME_IS_NULL)
-		logger.Error(err)
-		return err
+		return err(SERVICE_NAME_IS_NULL)
 
 	case s.opts.CallFunc == nil:
-		err := errors.New(CALL_FUNC_IS_NULL)
-		logger.Error(err)
-		return err
+		return err(CALL_FUNC_IS_NULL)
+
 	}
 
-	return s.run()
+	return nil
 }
 
 func (s *service) run() error {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/plugins/client"
@@ -17,7 +16,6 @@ func main() {
 
 	rsp, _ := client.Create(
 		client.Name("client.1"),
-		client.Ctx(context.Background()),
 		client.Input(input),
 		client.CallFunc(func(p client.CallFuncParams) (interface{}, error) {
 			// 业务代码处理

@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/asim/go-micro/v3"
 	"github.com/lidaqi001/micro/common/config"
-	"github.com/lidaqi001/micro/examples/services/async/subscriber/handler"
+	"github.com/lidaqi001/micro/examples/services/idle_async/subscriber/handler"
 	"github.com/lidaqi001/micro/plugins/service"
 )
 

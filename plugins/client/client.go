@@ -2,8 +2,7 @@ package client
 
 import (
 	"context"
-	"errors"
-	hystrix2 "github.com/afex/hystrix-go/hystrix"
+	_hystrix "github.com/afex/hystrix-go/hystrix"
 	"github.com/asim/go-micro/plugins/client/grpc/v3"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
@@ -13,6 +12,8 @@ import (
 	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
+	"github.com/opentracing/opentracing-go"
+	"io"
 )
 
 type client struct {
@@ -20,17 +21,26 @@ type client struct {
 }
 
 func Create(opts ...Option) (interface{}, error) {
+
 	options := Options{
 		Name:     "",
 		Init:     nil,
 		CallFunc: nil,
-		Context:  context.Background(),
+		Ctx:      context.Background(),
+
+		Context: context.Background(),
 	}
+
 	c := &client{opts: options}
-	return c.Init(opts...)
+
+	if err := c.Init(opts...); err != nil {
+		return nil, err
+	}
+
+	return c.run()
 }
 
-func (c client) Init(opts ...Option) (interface{}, error) {
+func (c *client) Init(opts ...Option) error {
 
 	for _, o := range opts {
 		o(&c.opts)
@@ -55,50 +65,44 @@ func (c client) Init(opts ...Option) (interface{}, error) {
 		c.opts.CallFunc = val
 	}
 
+	// 设置hystrix默认超时时间（单位：ms）
+	_hystrix.DefaultTimeout = 2000
+	// hystrix 配置自定义服务（重试、降级、熔断）
+	if c.opts.Hystrix != nil {
+		hystrix.Configure(c.opts.Hystrix)
+	}
+
 	switch {
 
 	case helper.Empty(c.opts.Name):
-		err := errors.New(NAME_IS_NULL)
-		logger.Error(err)
-		return nil, err
+		return err(NAME_IS_NULL)
 
 	case c.opts.CallFunc == nil:
-		err := errors.New(CALL_FUNC_IS_NULL)
-		logger.Error(err)
-		return nil, err
+		return err(CALL_FUNC_IS_NULL)
+
 	}
 
-	return c.run()
+	return nil
 }
 
-func (c client) run() (interface{}, error) {
+func (c *client) run() (interface{}, error) {
 
 	var (
 		ctx  = c.opts.Ctx
 		name = c.opts.Name
+
+		err   error
+		_io   io.Closer
+		trace opentracing.Tracer
 	)
 
-	// 设置hystrix默认超时时间（单位：ms）
-	hystrix2.DefaultTimeout = 2000
-
-	if c.opts.Hystrix != nil {
-		// hystrix 配置自定义服务（重试、降级、熔断）
-		hystrix.Configure(c.opts.Hystrix)
-	}
-
-	//if ctx == nil || ctx == context.Background() {
-	//	// 当 ctx==nil || ctx==context.Background() 时
-	//	// 初始化上下文和span
-	//	_, ctx = jaeger.GetTraceClientCtxAndSpan()
-	//}
-
-	// 设置trace server地址
-	t, io, err := jaeger.NewTracer(name)
+	// 设置trace client
+	trace, _io, err = jaeger.NewTracer(name)
 	if err != nil {
 		logger.Error(err)
 		return nil, err
 	}
-	defer io.Close()
+	defer _io.Close()
 
 	// 创建一个新的服务
 	service := micro.NewService(
@@ -113,7 +117,7 @@ func (c client) run() (interface{}, error) {
 		// 使用 hystrix 实现服务治理
 		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端
-		micro.WrapClient(traceplugin.NewClientWrapper(t)),
+		micro.WrapClient(traceplugin.NewClientWrapper(trace)),
 		// 自定义客户端中间件
 		//micro.WrapClient(log.LogWrap),
 	)

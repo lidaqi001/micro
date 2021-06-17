@@ -5,7 +5,7 @@ import (
 	"github.com/asim/go-micro/v3/broker"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
-	"github.com/lidaqi001/micro/examples/services/discard_asyncRocketmq/event/handler"
+	"github.com/lidaqi001/micro/examples/services/discard_async_rocketmq/event/handler"
 	"github.com/lidaqi001/micro/plugins/rocketmqPack"
 )
 

@@ -6,7 +6,7 @@ import (
 	"github.com/asim/go-micro/v3"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
-	"github.com/lidaqi001/micro/examples/services/asyncRedis/event/handler"
+	"github.com/lidaqi001/micro/examples/services/idle_async_redis/event/handler"
 	"github.com/lidaqi001/micro/plugins/service"
 )
 
