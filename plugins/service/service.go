@@ -14,6 +14,7 @@ import (
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
+	"time"
 )
 
 type service struct {
@@ -87,6 +88,8 @@ func (s *service) run() error {
 		// 服务名称
 		micro.Name(name),
 		// 服务注册
+		micro.RegisterTTL(time.Second*30),      // 注册存活时间30s
+		micro.RegisterInterval(time.Second*20), // 刷新服务存活时间的间隔时间（保持注册存活时间）
 		micro.Registry(etcd.NewRegistry(registry.Addrs(helper.GetRegistryAddress()))),
 		// wrap handler
 		micro.WrapHandler(
