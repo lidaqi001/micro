@@ -8,6 +8,7 @@ import (
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
+	"github.com/asim/go-micro/v3/server"
 	"github.com/juju/ratelimit"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/logger"
@@ -21,12 +22,17 @@ type service struct {
 	opts Options
 }
 
+var (
+	serverInit = []server.Option{}
+)
+
 func Create(opts ...Option) error {
 	options := Options{
-		Name:     "",
-		Init:     nil,
-		CallFunc: nil,
-		Context:  context.Background(),
+		Name:      "",
+		Advertise: "",
+		Init:      nil,
+		CallFunc:  nil,
+		Context:   context.Background(),
 	}
 
 	s := &service{opts: options}
@@ -44,14 +50,17 @@ func (s *service) Init(opts ...Option) error {
 		o(&s.opts)
 	}
 
-	if name, ok := s.opts.Context.Value(serviceNameKey{}).(string); ok {
-		s.opts.Name = name
+	if val, ok := s.opts.Context.Value(advertiseKey{}).(string); ok {
+		s.opts.Advertise = val
 	}
-	if init, ok := s.opts.Context.Value(initKey{}).([]micro.Option); ok {
-		s.opts.Init = init
+	if val, ok := s.opts.Context.Value(serviceNameKey{}).(string); ok {
+		s.opts.Name = val
 	}
-	if fn, ok := s.opts.Context.Value(callFuncKey{}).(func(micro.Service)); ok {
-		s.opts.CallFunc = fn
+	if val, ok := s.opts.Context.Value(initKey{}).([]micro.Option); ok {
+		s.opts.Init = val
+	}
+	if val, ok := s.opts.Context.Value(callFuncKey{}).(func(micro.Service)); ok {
+		s.opts.CallFunc = val
 	}
 
 	switch {
@@ -61,6 +70,11 @@ func (s *service) Init(opts ...Option) error {
 
 	case s.opts.CallFunc == nil:
 		return err(CALL_FUNC_IS_NULL)
+
+	case !helper.Empty(s.opts.Advertise):
+		serverInit = append(serverInit, server.Advertise(s.opts.Advertise))
+		// fallthrough 关键字，继续向下匹配case
+		//fallthrough
 
 	}
 
@@ -94,9 +108,7 @@ func (s *service) run() error {
 		// wrap handler
 		micro.WrapHandler(
 			// 基于ratelimit 限流
-			ratelimiter.NewHandlerWrapper(
-				ratelimit.NewBucketWithRate(helper.GetQPS()), false,
-			),
+			ratelimiter.NewHandlerWrapper(ratelimit.NewBucketWithRate(helper.GetQPS()), false),
 		),
 		micro.WrapHandler(
 			// 基于 jaeger 采集追踪数据
@@ -106,7 +118,6 @@ func (s *service) run() error {
 		),
 		// wrap subscriber
 		// subscriber 消息服务（异步事件/订阅）-链路追踪
-		// ！！！目前对于自定义的驱动不生效！！！
 		micro.WrapSubscriber(
 			traceplugin.NewSubscriberWrapper(t),
 			trace.SubWrapper,
@@ -115,6 +126,9 @@ func (s *service) run() error {
 
 	// 初始化，会解析命令行参数
 	service.Init(s.opts.Init...)
+
+	// 服务初始化
+	service.Server().Init(serverInit...)
 
 	// 注册处理器，调用服务接口处理请求
 	s.opts.CallFunc(service)
