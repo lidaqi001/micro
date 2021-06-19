@@ -14,7 +14,6 @@ type Options struct {
 	Advertise string
 	Init      []micro.Option
 	CallFunc  func(service micro.Service)
-
 }
 
 type initKey struct{}
@@ -26,6 +25,7 @@ func Name(val string) Option {
 	return SetOption(serviceNameKey{}, val)
 }
 
+// registry node address
 func Advertise(val string) Option {
 	return SetOption(advertiseKey{}, val)
 }
