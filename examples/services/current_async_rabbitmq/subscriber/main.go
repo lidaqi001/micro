@@ -2,21 +2,37 @@ package main
 
 import (
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/broker"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/services/current_async_rabbitmq/subscriber/handler"
-	"github.com/lidaqi001/micro/plugins/rabbitmqPack"
+	"github.com/lidaqi001/micro/plugins/event"
+	"github.com/lidaqi001/micro/plugins/service"
 )
 
 func main() {
 
-	rabbitmqPack.Create(
-
-		config.SERVICE_ASYNC_SUBSCRIBER,
-
-		func(service micro.Service, pbsb broker.Broker) {
+	_ = service.Create(
+		service.Name(config.SERVICE_ASYNC_SUBSCRIBER),
+		service.RabbitmqBroker(),
+		service.CallFunc(func(service micro.Service) {
 
 			// 注册订阅
+
+			/**
+			指定队列（使用，稳定的线上运行时）
+
+			注意点：队列名称不能重复！！！
+
+			将队列名称放在一个配置文件中，以队列名称定义常量名
+			确保队列名称没有重复
+			*/
+
+			e := Event.New{Server: service.Server()}
+
+			_ = e.Subscribe(config.EVENT_A, config.QUEUE_A, handler.SingEvent)
+
+			_ = e.Subscribe(config.EVENT_A, config.QUEUE_B, handler.SingEvent)
+
+			_ = e.Subscribe(config.EVENT_B, config.QUEUE_C, handler.CallSing)
 
 			/**
 			不指定队列（不使用，会导致消息数据丢失）
@@ -34,23 +50,6 @@ func main() {
 					handler.CallSing,
 				)
 			*/
-
-			/**
-			指定队列（使用，稳定的线上运行时）
-
-			注意点：队列名称不能重复！！！
-
-			将队列名称放在一个配置文件中，以队列名称定义常量名
-			确保队列名称没有重复
-			*/
-
-			e := rabbitmqPack.Event{Server: service.Server()}
-
-			_ = e.Subscribe(config.EVENT_A, config.QUEUE_A, handler.SingEvent)
-
-			_ = e.Subscribe(config.EVENT_A, config.QUEUE_B, handler.SingEvent)
-
-			_ = e.Subscribe(config.EVENT_B, config.QUEUE_C, handler.CallSing)
-		},
+		}),
 	)
 }

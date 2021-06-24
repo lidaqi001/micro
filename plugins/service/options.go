@@ -14,15 +14,23 @@ type Options struct {
 	Advertise string
 	Init      []micro.Option
 	CallFunc  func(service micro.Service)
+
+	// use rabbitmq as the broker driver
+	Rabbitmq bool
 }
 
 type initKey struct{}
 type callFuncKey struct{}
 type serviceNameKey struct{}
 type advertiseKey struct{}
+type Rabbitmq struct{}
 
 func Name(val string) Option {
 	return SetOption(serviceNameKey{}, val)
+}
+
+func RabbitmqBroker() Option {
+	return SetOption(Rabbitmq{}, true)
 }
 
 // registry node address

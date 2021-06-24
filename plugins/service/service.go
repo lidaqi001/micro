@@ -10,7 +10,9 @@ import (
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/asim/go-micro/v3/server"
 	"github.com/juju/ratelimit"
+	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
+	"github.com/lidaqi001/micro/plugins/broker/rabbitmq"
 	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
@@ -33,6 +35,7 @@ func Create(opts ...Option) error {
 		Init:      nil,
 		CallFunc:  nil,
 		Context:   context.Background(),
+		Rabbitmq:  false,
 	}
 
 	s := &service{opts: options}
@@ -61,6 +64,21 @@ func (s *service) Init(opts ...Option) error {
 	}
 	if val, ok := s.opts.Context.Value(callFuncKey{}).(func(micro.Service)); ok {
 		s.opts.CallFunc = val
+	}
+	if val, ok := s.opts.Context.Value(Rabbitmq{}).(bool); ok && val {
+		// 设置rabbitmq地址
+		rabbitmq.DefaultRabbitURL = helper.GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
+		s.opts.Init = append(s.opts.Init, micro.Broker(
+			// 设置 rabbitmq 为 broker 驱动
+			rabbitmq.NewBroker(
+				// 设置：Exchange 为持久化
+				// If this option is not set, the exchange will be deleted when rabbitmq restarts
+				rabbitmq.DurableExchange(),
+				// 设置：订阅时创建持久化队列
+				rabbitmq.PrefetchGlobal(),
+			),
+		),
+		)
 	}
 
 	switch {

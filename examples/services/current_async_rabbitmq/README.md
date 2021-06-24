@@ -20,6 +20,6 @@
         
         - 最终解决方案：
             - 重写了rabbitmq驱动（plugins/broker/rabbitmq）
-            - 仍然使用 micro 发布/订阅，封装组件（plugins/rabbitmqPack）
+            - 仍然使用 micro 发布/订阅，封装组件（plugins/event）
                 - 发布：micro.NewEvent().Publish()
                 - 订阅：micro.RegisterSubscriber()

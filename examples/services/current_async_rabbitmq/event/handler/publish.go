@@ -5,7 +5,7 @@ import (
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/event"
 	"github.com/lidaqi001/micro/examples/proto/user"
-	"github.com/lidaqi001/micro/plugins/rabbitmqPack"
+	e "github.com/lidaqi001/micro/plugins/event"
 	"log"
 	"time"
 )
@@ -13,7 +13,7 @@ import (
 func (s *DemoServiceHandler) publishSayHelloByUserId(req *user.UserRequest) error {
 
 	// 发布消息
-	e := rabbitmqPack.Event{Client: s.Service.Client()}
+	e := e.New{Client: s.Service.Client()}
 	err := e.Publish(config.EVENT_A, context.TODO(), &event.DemoEvent{
 		City:        req.Id,
 		Timestamp:   time.Now().UTC().Unix(),
@@ -28,7 +28,7 @@ func (s *DemoServiceHandler) publishSayHelloByUserId(req *user.UserRequest) erro
 func (s *DemoServiceHandler) publishSayHello(req string) error {
 
 	// 发布消息
-	e := rabbitmqPack.Event{Client: s.Service.Client()}
+	e := e.New{Client: s.Service.Client()}
 	err := e.Publish(config.EVENT_B, context.TODO(), &event.DemoEvent{
 		City:        req,
 		Timestamp:   time.Now().UTC().Unix(),
