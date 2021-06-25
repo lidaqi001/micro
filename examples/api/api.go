@@ -1,14 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/lidaqi001/micro/examples/api/handler"
 	"github.com/lidaqi001/micro/examples/api/jwt"
 	"github.com/lidaqi001/micro/examples/api/middleware"
+	config2 "github.com/lidaqi001/micro/plugins/config"
 	"log"
 )
 
 func main() {
+	if err := config2.RemoteConfig(
+		config2.ConfigEtcdEndpoint("http://192.168.1.146:2379"),
+	); err != nil {
+		fmt.Println(err)
+	}
+
 	r := gin.Default()
 	h := handler.NewHandler()
 

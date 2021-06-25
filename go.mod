@@ -20,19 +20,18 @@ require (
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
 	github.com/google/uuid v1.1.5
-	github.com/json-iterator/go v1.1.11 // indirect
 	github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601103936-8d9a4854d7dc
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rs/zerolog v1.22.0
+	github.com/spf13/viper v1.8.0
 	github.com/streadway/amqp v0.0.0-20200108173154-1c71cc93ed71
 	github.com/uber/jaeger-client-go v2.27.0+incompatible
 	github.com/uber/jaeger-lib v2.4.1+incompatible // indirect
 	github.com/ugorji/go v1.2.5 // indirect
 	google.golang.org/grpc/examples v0.0.0-20210422002751-6f35bbbfb82d // indirect
 	google.golang.org/protobuf v1.26.0
-	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gorm.io/driver/mysql v1.1.0
 	gorm.io/gorm v1.21.10
 )

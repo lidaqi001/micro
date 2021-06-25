@@ -16,6 +16,11 @@
         - 基于jaeger
         - 同步/异步
         
+    - 配置中心
+        - [viper](https://github.com/spf13/viper)
+            - 基于etcd远程配置
+            - 动态更新配置
+        
     - 同步服务
         - 客户端
         - 服务端
