@@ -99,12 +99,6 @@ func (c *config) run() error {
 		return err
 	}
 
-	//fmt.Println(
-	//	err,
-	//	viper.AllKeys(),
-	//	viper.Get("common.database.host"),
-	//)
-
 	go func() {
 		for {
 			// 每次请求后延迟1s
@@ -116,50 +110,6 @@ func (c *config) run() error {
 			}
 		}
 	}()
-
-	return nil
-}
-
-func (c *config) run2() error {
-
-	var err error
-
-	// alternatively, you can create a new viper instance.
-	var runtime_viper = viper.New()
-
-	err = runtime_viper.AddRemoteProvider(
-		"etcd",
-		c.opts.ConfigEtcdEndpoint,
-		c.opts.ConfigPath,
-	)
-	if err != nil {
-		return err
-	}
-
-	runtime_viper.SetConfigType("yaml") // because there is no file extension in a stream of bytes,
-	// supported extensions are "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
-
-	// read from remote config the first time.
-	err = runtime_viper.ReadRemoteConfig()
-
-	fmt.Println(
-		err,
-		runtime_viper.AllKeys(),
-		viper.Get("common.database.host"),
-	)
-	// 监听远程配置
-	_ = runtime_viper.WatchRemoteConfigOnChannel()
-
-	fmt.Println(
-		runtime_viper.Get("common.database.host"),
-	)
-	time.Sleep(time.Second * 10)
-	fmt.Println(
-		runtime_viper.Get("common.database.host"),
-	)
-	if err != nil {
-		return err
-	}
 
 	return nil
 }
