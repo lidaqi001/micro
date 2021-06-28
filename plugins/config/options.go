@@ -1,6 +1,9 @@
 package config
 
-import "context"
+import (
+	"context"
+	"github.com/lidaqi001/micro/common/helper"
+)
 
 type Option func(opts *Options)
 
@@ -16,7 +19,6 @@ type Options struct {
 const (
 	DEFAULT_CONFIG_PATH          = "/config"
 	DEFAULT_CONFIG_TYPE          = "yaml"
-	DEFAULT_CONFIG_ETCD_ENDPOINT = "http://127.0.0.1:2379"
 )
 
 type configPathKey struct{}

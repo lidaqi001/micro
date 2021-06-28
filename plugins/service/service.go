@@ -37,10 +37,6 @@ func Create(opts ...Option) error {
 		CallFunc:  nil,
 		Context:   context.Background(),
 		Rabbitmq:  false,
-
-		ConfigPath:         config2.DEFAULT_CONFIG_PATH,
-		ConfigType:         config2.DEFAULT_CONFIG_TYPE,
-		ConfigEtcdEndpoint: config2.DEFAULT_CONFIG_ETCD_ENDPOINT,
 	}
 
 	s := &service{opts: options}

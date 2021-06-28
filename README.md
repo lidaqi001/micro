@@ -35,6 +35,10 @@
         
 - env
 ```env
+// 开发模式
+DEBUG=1 // 使用生产环境配置
+DEBUG=0 // 使用开发环境配置（默认）
+
 // 限流设置QPS
 QPS=100
 
@@ -43,9 +47,6 @@ REGISTRY_ADDR=127.0.0.1:2379
 
 // Jaeger Agent地址（6831端口）
 TRACE_ADDR=127.0.0.1:6831
-
-// 
-jiagnsujiang 
 ```
 
 - 快速运行
