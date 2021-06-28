@@ -1,7 +1,8 @@
-package config
+package api
 
 import (
 	"context"
+	"github.com/gin-gonic/gin"
 )
 
 type Option func(opts *Options)
@@ -9,20 +10,22 @@ type Option func(opts *Options)
 type Options struct {
 	Context context.Context
 
+	Router func(engine *gin.Engine)
+
 	// viper configuration (https://github.com/spf13/viper)
 	ConfigPath         string
 	ConfigType         string
 	ConfigEtcdEndpoint string
 }
 
-const (
-	DEFAULT_CONFIG_PATH = "/config"
-	DEFAULT_CONFIG_TYPE = "yaml"
-)
-
+type routeKey struct{}
 type configPathKey struct{}
 type configTypeKey struct{}
 type configEtcdEndpointKey struct{}
+
+func Route(val func(engine *gin.Engine)) Option {
+	return SetOption(routeKey{}, val)
+}
 
 func ConfigPath(val string) Option {
 	return SetOption(configPathKey{}, val)
