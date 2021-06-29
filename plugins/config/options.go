@@ -6,18 +6,12 @@ import (
 
 type Option func(opts *Options)
 
-type COption struct {
-	// viper configuration (https://github.com/spf13/viper)
-	ConfigPath         string
-	ConfigType         string
-	ConfigEtcdEndpoint string
-}
-
 type Options struct {
 	// viper configuration (https://github.com/spf13/viper)
 	ConfigPath         string
 	ConfigType         string
 	ConfigEtcdEndpoint string
+
 	//COption
 	Context context.Context
 }

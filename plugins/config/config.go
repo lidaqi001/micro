@@ -9,7 +9,6 @@ import (
 	_ "github.com/spf13/viper/remote"
 	"os"
 	"strconv"
-	"time"
 )
 
 type config struct {
@@ -28,7 +27,6 @@ func LoadConfigFromEtcd(opts ...Option) (*viper.Viper, error) {
 	options := Options{
 		Context: context.Background(),
 
-		// 配置路径（配置文件必须提前配好）
 		ConfigPath:         DEFAULT_CONFIG_PATH,
 		ConfigType:         DEFAULT_CONFIG_TYPE,
 		ConfigEtcdEndpoint: "http://" + helper.GetRegistryAddress(),
@@ -60,62 +58,6 @@ func (c *config) init(opts ...Option) {
 
 }
 
-func (c *config) run2() error {
-
-	var (
-		err    error
-		debug  string
-		suffix string
-	)
-
-	// 默认配置为开发环境 ： {c.opts.ConfigPath}_dev
-	suffix = SUFFIX_DEV
-
-	if debug = os.Getenv("DEBUG"); len(debug) > 0 {
-
-		d, err := strconv.ParseInt(debug, 10, 64)
-		if err != nil {
-			return errors.New(
-				fmt.Sprintf("%s\nerror:%v", ERROR_DEBUG_ENV, err),
-			)
-		}
-		if d == 0 {
-			// 设置为生产环境 ： {c.opts.ConfigPath}_prod
-			suffix = SUFFIX_PROD
-		}
-	}
-
-	if err = viper.AddRemoteProvider(
-		"etcd",
-		c.opts.ConfigEtcdEndpoint,
-		(c.opts.ConfigPath + suffix),
-	); err != nil {
-		return err
-	}
-
-	viper.SetConfigType(c.opts.ConfigType) // because there is no file extension in a stream of bytes,
-	// supported extensions are "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
-
-	// read from remote config the first time.
-	if err = viper.ReadRemoteConfig(); err != nil {
-		return err
-	}
-
-	go func() {
-		for {
-			// 每次请求后延迟1s
-			time.Sleep(time.Second * 1)
-
-			// 监听远程配置变化
-			if err := viper.WatchRemoteConfig(); err != nil {
-				fmt.Printf("viper.WatchRemoteConfig() error:%v", err)
-			}
-		}
-	}()
-
-	return nil
-}
-
 func (c *config) run() (*viper.Viper, error) {
 
 	var (
@@ -124,7 +66,7 @@ func (c *config) run() (*viper.Viper, error) {
 		suffix string
 	)
 
-	// 默认配置为开发环境 ： {c.opts.ConfigPath}_dev
+	// The default configuration is development environment ： {c.opts.ConfigPath}_dev
 	suffix = SUFFIX_DEV
 
 	if debug = os.Getenv("DEBUG"); len(debug) > 0 {
@@ -136,7 +78,7 @@ func (c *config) run() (*viper.Viper, error) {
 			)
 		}
 		if d == 0 {
-			// 设置为生产环境 ： {c.opts.ConfigPath}_prod
+			// Set to the production environment ： {c.opts.ConfigPath}_prod
 			suffix = SUFFIX_PROD
 		}
 	}
@@ -152,15 +94,16 @@ func (c *config) run() (*viper.Viper, error) {
 		return nil, err
 	}
 
-	runtime_viper.SetConfigType(c.opts.ConfigType) // because there is no file extension in a stream of bytes,
 	// supported extensions are "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
+	// because there is no file extension in a stream of bytes,
+	runtime_viper.SetConfigType(c.opts.ConfigType)
 
 	// read from remote config the first time.
 	if err = runtime_viper.ReadRemoteConfig(); err != nil {
 		return nil, err
 	}
 
-	// 监听远程配置变更
+	// listen for remote configuration changes
 	if err = runtime_viper.WatchRemoteConfigOnChannel(); err != nil {
 		return nil, err
 	}
