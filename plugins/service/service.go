@@ -13,7 +13,6 @@ import (
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/broker/rabbitmq"
-	config2 "github.com/lidaqi001/micro/plugins/config"
 	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/service/trace"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
@@ -67,17 +66,6 @@ func (s *service) Init(opts ...Option) error {
 		s.opts.CallFunc = val
 	}
 
-	// set viper remote configuration (https://github.com/spf13/viper)
-	if val, ok := s.opts.Context.Value(configPathKey{}).(string); ok && len(val) > 0 {
-		s.opts.ConfigPath = val
-	}
-	if val, ok := s.opts.Context.Value(configTypeKey{}).(string); ok && len(val) > 0 {
-		s.opts.ConfigType = val
-	}
-	if val, ok := s.opts.Context.Value(configEtcdEndpointKey{}).(string); ok && len(val) > 0 {
-		s.opts.ConfigEtcdEndpoint = val
-	}
-
 	// set rabbitmq for broker driver
 	if val, ok := s.opts.Context.Value(rabbitmqKey{}).(bool); ok && val {
 		// 设置rabbitmq地址
@@ -93,15 +81,6 @@ func (s *service) Init(opts ...Option) error {
 			),
 		),
 		)
-	}
-
-	// set viper remote configuration
-	if err := config2.RemoteConfig(
-		config2.ConfigPath(s.opts.ConfigPath),
-		config2.ConfigType(s.opts.ConfigType),
-		config2.ConfigEtcdEndpoint(s.opts.ConfigEtcdEndpoint),
-	); err != nil {
-		return err
 	}
 
 	switch {

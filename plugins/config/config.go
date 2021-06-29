@@ -23,7 +23,8 @@ const (
 	SUFFIX_PROD = "_prod"
 )
 
-func RemoteConfig(opts ...Option) error {
+//RemoteConfig
+func LoadConfigFromEtcd(opts ...Option) (*viper.Viper, error) {
 	options := Options{
 		Context: context.Background(),
 
@@ -35,11 +36,12 @@ func RemoteConfig(opts ...Option) error {
 
 	c := &config{opts: options}
 
-	c.Init(opts...)
+	c.init(opts...)
 
 	return c.run()
 }
-func (c *config) Init(opts ...Option) {
+
+func (c *config) init(opts ...Option) {
 
 	for _, o := range opts {
 		o(&c.opts)
@@ -58,7 +60,7 @@ func (c *config) Init(opts ...Option) {
 
 }
 
-func (c *config) run() error {
+func (c *config) run2() error {
 
 	var (
 		err    error
@@ -112,4 +114,56 @@ func (c *config) run() error {
 	}()
 
 	return nil
+}
+
+func (c *config) run() (*viper.Viper, error) {
+
+	var (
+		err    error
+		debug  string
+		suffix string
+	)
+
+	// 默认配置为开发环境 ： {c.opts.ConfigPath}_dev
+	suffix = SUFFIX_DEV
+
+	if debug = os.Getenv("DEBUG"); len(debug) > 0 {
+
+		d, err := strconv.ParseInt(debug, 10, 64)
+		if err != nil {
+			return nil, errors.New(
+				fmt.Sprintf("%s\nerror:%v", ERROR_DEBUG_ENV, err),
+			)
+		}
+		if d == 0 {
+			// 设置为生产环境 ： {c.opts.ConfigPath}_prod
+			suffix = SUFFIX_PROD
+		}
+	}
+
+	// alternatively, you can create a new viper instance.
+	var runtime_viper = viper.New()
+
+	if err = runtime_viper.AddRemoteProvider(
+		"etcd",
+		c.opts.ConfigEtcdEndpoint,
+		(c.opts.ConfigPath + suffix),
+	); err != nil {
+		return nil, err
+	}
+
+	runtime_viper.SetConfigType(c.opts.ConfigType) // because there is no file extension in a stream of bytes,
+	// supported extensions are "json", "toml", "yaml", "yml", "properties", "props", "prop", "env", "dotenv"
+
+	// read from remote config the first time.
+	if err = runtime_viper.ReadRemoteConfig(); err != nil {
+		return nil, err
+	}
+
+	// 监听远程配置变更
+	if err = runtime_viper.WatchRemoteConfigOnChannel(); err != nil {
+		return nil, err
+	}
+
+	return runtime_viper, nil
 }
