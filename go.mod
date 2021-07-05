@@ -11,15 +11,16 @@ require (
 	github.com/asim/go-micro/plugins/client/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/registry/etcd/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/server/grpc/v3 v3.0.0-20210416163442-a91d1f7a3dbb
+	github.com/asim/go-micro/plugins/server/http/v3 v3.0.0-20210630091305-70ed9bf15486
 	github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3 v3.0.0-20210416163442-a91d1f7a3dbb
 	github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3 v3.0.0-20210416163442-a91d1f7a3dbb
-	github.com/asim/go-micro/v3 v3.5.1
+	github.com/asim/go-micro/v3 v3.5.2-0.20210630062103-c13bb07171bc
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/eapache/go-resiliency v1.1.0
 	github.com/gin-gonic/gin v1.7.1
 	github.com/go-playground/validator/v10 v10.6.0 // indirect
 	github.com/golang/protobuf v1.5.2
-	github.com/google/uuid v1.1.5
+	github.com/google/uuid v1.2.0
 	github.com/juju/ratelimit v1.0.2-0.20191002062651-f60b32039441
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/lidaqi001/micro/plugins/broker/rocketmq v0.0.0-20210601103936-8d9a4854d7dc

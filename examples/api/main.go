@@ -12,10 +12,6 @@ func main() {
 
 	_ = api.Create(api.Route(func(g *gin.Engine) {
 
-		//fmt.Println(v.Get("service.S_A"))
-		//v.Set("service.S_A", "bbb")
-		//fmt.Println(v.Get("service.S_A"))
-
 		h := handler.NewHandler()
 
 		// 示例请求

@@ -5,9 +5,18 @@ import (
 	"github.com/lidaqi001/micro/plugins/logger"
 )
 
-func err(msg string) error {
-	e := errors.New(msg)
-	logger.Error(e)
+func sErr(v interface{}) error {
+	var e error
+
+	switch v.(type) {
+	case string:
+		e = errors.New(v.(string))
+	case error:
+		e = v.(error)
+	}
+
+	logger.Error("service error: ", e)
+
 	return e
 }
 

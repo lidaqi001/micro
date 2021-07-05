@@ -4,11 +4,13 @@ import (
 	"context"
 	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
+	httpServer "github.com/asim/go-micro/plugins/server/http/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
 	"github.com/asim/go-micro/v3/registry"
 	"github.com/asim/go-micro/v3/server"
+	"github.com/gin-gonic/gin"
 	"github.com/juju/ratelimit"
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
@@ -30,12 +32,14 @@ var (
 
 func Create(opts ...Option) error {
 	options := Options{
-		Name:      "",
-		Advertise: "",
-		Init:      nil,
-		CallFunc:  nil,
-		Context:   context.Background(),
-		Rabbitmq:  false,
+		CallFunc:   func(m micro.Service) {},
+		Context:    context.Background(),
+		RpcAddr:    DEFAULT_RPC_ADDR,
+		HttpAddr:   DEFAULT_HTTP_ADDR,
+		Rabbitmq:   true,
+		Server:     grpc.NewServer(),
+		ServerType: RPC,
+		BindRoute:  DEFAULT_BIND_ROUTE,
 	}
 
 	s := &service{opts: options}
@@ -53,6 +57,17 @@ func (s *service) Init(opts ...Option) error {
 		o(&s.opts)
 	}
 
+	// set rabbitmq for broker driver
+	if val, ok := s.opts.Context.Value(rabbitmqKey{}).(bool); ok {
+		s.opts.Rabbitmq = val
+	}
+	if val, ok := s.opts.Context.Value(addressKey{}).(string); ok {
+		s.opts.RpcAddr = val
+		s.opts.HttpAddr = val
+	}
+	if val, ok := s.opts.Context.Value(serverTypeKey{}).(Mode); ok {
+		s.opts.ServerType = val
+	}
 	if val, ok := s.opts.Context.Value(advertiseKey{}).(string); ok {
 		s.opts.Advertise = val
 	}
@@ -62,34 +77,20 @@ func (s *service) Init(opts ...Option) error {
 	if val, ok := s.opts.Context.Value(initKey{}).([]micro.Option); ok {
 		s.opts.Init = val
 	}
+	if val, ok := s.opts.Context.Value(bindRouteKey{}).(func(*gin.Engine)); ok {
+		s.opts.BindRoute = val
+	}
 	if val, ok := s.opts.Context.Value(callFuncKey{}).(func(micro.Service)); ok {
 		s.opts.CallFunc = val
-	}
-
-	// set rabbitmq for broker driver
-	if val, ok := s.opts.Context.Value(rabbitmqKey{}).(bool); ok && val {
-		// 设置rabbitmq地址
-		rabbitmq.DefaultRabbitURL = helper.GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
-		s.opts.Init = append(s.opts.Init, micro.Broker(
-			// 设置 rabbitmq 为 broker 驱动
-			rabbitmq.NewBroker(
-				// 设置：Exchange 为持久化
-				// If this option is not set, the exchange will be deleted when rabbitmq restarts
-				rabbitmq.DurableExchange(),
-				// 设置：订阅时创建持久化队列
-				rabbitmq.PrefetchGlobal(),
-			),
-		),
-		)
 	}
 
 	switch {
 
 	case helper.Empty(s.opts.Name):
-		return err(SERVICE_NAME_IS_NULL)
+		return sErr(SERVICE_NAME_IS_NULL)
 
-	case s.opts.CallFunc == nil:
-		return err(CALL_FUNC_IS_NULL)
+	//case s.opts.CallFunc == nil:
+	//	return sErr(CALL_FUNC_IS_NULL)
 
 	case !helper.Empty(s.opts.Advertise):
 		serverInit = append(serverInit, server.Advertise(s.opts.Advertise))
@@ -97,6 +98,70 @@ func (s *service) Init(opts ...Option) error {
 		//fallthrough
 
 	}
+
+	// set rabbitmq
+	if s.opts.Rabbitmq == true {
+		rabbitmq.DefaultRabbitURL = helper.GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
+		s.opts.Init = append(
+			s.opts.Init, micro.Broker(
+				// 设置 rabbitmq 为 broker 驱动
+				rabbitmq.NewBroker(
+					// 设置：Exchange 为持久化
+					// If this option is not set, the exchange will be deleted when rabbitmq restarts
+					rabbitmq.DurableExchange(),
+					// 设置：订阅时创建持久化队列
+					rabbitmq.PrefetchGlobal(),
+				),
+			),
+		)
+	}
+
+	switch s.opts.ServerType {
+	case HTTP:
+		err := s.lnitializeHttp()
+		if err != nil {
+			return sErr(err)
+		}
+	case RPC:
+		s.opts.Init = append(s.opts.Init, micro.Address(s.opts.RpcAddr))
+	}
+
+	return nil
+}
+
+func (s *service) lnitializeHttp() error {
+
+	srv := httpServer.NewServer(
+		server.Name(s.opts.Name+"_http"),
+		server.Address(s.opts.HttpAddr),
+	)
+
+	// set gin mode
+	v, err := helper.IsOpenDebug()
+	if err == nil {
+		if v {
+			gin.SetMode(gin.DebugMode)
+		} else {
+			gin.SetMode(gin.ReleaseMode)
+		}
+	} else {
+		return err
+	}
+
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	// bind route for http server
+	s.opts.BindRoute(router)
+
+	hd := srv.NewHandler(router)
+	if err := srv.Handle(hd); err != nil {
+		logger.Error(err)
+		return err
+	}
+
+	s.opts.Server = srv
 
 	return nil
 }
@@ -107,8 +172,7 @@ func (s *service) run() error {
 	// 初始化全局服务追踪
 	t, io, err := jaeger.NewTracer(name)
 	if err != nil {
-		logger.Error(err)
-		return err
+		return sErr(err)
 	}
 	defer io.Close()
 	// 设置为全局 tracer
@@ -118,7 +182,7 @@ func (s *service) run() error {
 	// 创建新的服务
 	service := micro.NewService(
 		// 使用grpc协议
-		micro.Server(grpc.NewServer()),
+		micro.Server(s.opts.Server),
 		// 服务名称
 		micro.Name(name),
 		// 服务注册
@@ -129,8 +193,7 @@ func (s *service) run() error {
 		micro.WrapHandler(
 			// 基于ratelimit 限流
 			ratelimiter.NewHandlerWrapper(ratelimit.NewBucketWithRate(helper.GetQPS()), false),
-		),
-		micro.WrapHandler(
+
 			// 基于 jaeger 采集追踪数据
 			// handler 调用服务-链路追踪
 			traceplugin.NewHandlerWrapper(t),
@@ -148,15 +211,17 @@ func (s *service) run() error {
 	service.Init(s.opts.Init...)
 
 	// 服务初始化
-	service.Server().Init(serverInit...)
+	err = service.Server().Init(serverInit...)
+	if err != nil {
+		return sErr(err)
+	}
 
 	// 注册处理器，调用服务接口处理请求
 	s.opts.CallFunc(service)
 
 	// 启动服务
 	if err := service.Run(); err != nil {
-		logger.Error(err)
-		return err
+		return sErr(err)
 	}
 
 	return nil

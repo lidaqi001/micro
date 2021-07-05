@@ -2,13 +2,9 @@ package config
 
 import (
 	"context"
-	"errors"
-	"fmt"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/spf13/viper"
 	_ "github.com/spf13/viper/remote"
-	"os"
-	"strconv"
 )
 
 type config struct {
@@ -62,25 +58,20 @@ func (c *config) run() (*viper.Viper, error) {
 
 	var (
 		err    error
-		debug  string
 		suffix string
 	)
 
 	// The default configuration is development environment ： {c.opts.ConfigPath}_dev
 	suffix = SUFFIX_DEV
 
-	if debug = os.Getenv("DEBUG"); len(debug) > 0 {
-
-		d, err := strconv.ParseInt(debug, 10, 64)
-		if err != nil {
-			return nil, errors.New(
-				fmt.Sprintf("%s\nerror:%v", ERROR_DEBUG_ENV, err),
-			)
-		}
-		if d == 0 {
+	v, err := helper.IsOpenDebug()
+	if err == nil {
+		if !v {
 			// Set to the production environment ： {c.opts.ConfigPath}_prod
 			suffix = SUFFIX_PROD
 		}
+	} else {
+		return nil, err
 	}
 
 	// alternatively, you can create a new viper instance.

@@ -3,15 +3,16 @@ package trace
 import (
 	"context"
 	"github.com/asim/go-micro/v3/server"
-	"log"
+	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
+	"log"
 )
 
 // SpanWrapper is a handler wrapper
 func SpanWrapper(fn server.HandlerFunc) server.HandlerFunc {
 	return func(ctx context.Context, req server.Request, rsp interface{}) error {
 
-		log.Printf(
+		logger.Infof(
 			"[Han Wrapper] server request: %v，server request params: %v",
 			req.Endpoint(),
 			req.Body(),
@@ -29,7 +30,7 @@ func SpanWrapper(fn server.HandlerFunc) server.HandlerFunc {
 		// Trace：记录 返回值/错误
 		sp.SetResponse(rsp, err)
 
-		log.Printf("[Han Wrapper] server rsp: %v", rsp)
+		logger.Infof("[Han Wrapper] server rsp: %v", rsp)
 
 		return err
 	}

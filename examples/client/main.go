@@ -8,20 +8,23 @@ import (
 )
 
 func main() {
+	//os.Setenv("REGISTRY_ADDR", "etcd1.shan-service.svc.cluster.local:2379")
 
-	input := make(map[string]string)
-	input["a"] = "a"
-	input["b"] = "b"
-	input["c"] = "c"
+	input := map[string]string{
+		"a": "a",
+		"b": "b",
+		"c": "c",
+	}
 
+	// 请求服务端
 	rsp, _ := client.Create(
 		client.Name("client.1"),
 		client.Input(input),
 		client.CallFunc(func(p client.CallFuncParams) (interface{}, error) {
-			
+
 			// 业务代码处理
 			i := p.Input.(map[string]string)
-			log.Printf("传参:::%v,%v", input, i["a"])
+			log.Printf("input:::%v,%v", input, i)
 
 			cli := user.NewDemoService(config.SERVICE_SPEAK, p.Service.Client())
 			req := &user.DemoRequest{Name: "lidaqi"}
@@ -29,6 +32,7 @@ func main() {
 		}),
 	)
 
+	// 对返回值类型断言
 	switch rsp.(type) {
 	case *user.DemoResponse:
 		rsp = rsp.(*user.DemoResponse)

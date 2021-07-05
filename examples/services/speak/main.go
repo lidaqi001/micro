@@ -6,15 +6,18 @@ import (
 	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/examples/proto/user"
 	"github.com/lidaqi001/micro/examples/services/speak/handler"
-	config2 "github.com/lidaqi001/micro/plugins/config"
 	"github.com/lidaqi001/micro/plugins/service"
 )
 
 func main() {
-	_, err := config2.LoadConfigFromEtcd(config2.EtcdEndpoint("http://192.168.1.146:2379"))
-	if err != nil {
-		fmt.Println(err)
-	}
+	var err error
+	//os.Setenv("REGISTRY_ADDR", "etcd1.shan-service.svc.cluster.local:2379")
+	//v, err = config2.LoadConfigFromEtcd()
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//fmt.Println("v.db.user",v.Get("db.user"))
+
 	err = service.Create(
 		service.Name(config.SERVICE_SPEAK),
 		//service.Advertise("127.0.0.1:9207"),

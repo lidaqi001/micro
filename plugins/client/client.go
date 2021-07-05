@@ -11,6 +11,7 @@ import (
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
+	"github.com/lidaqi001/micro/plugins/wrapper/client/log"
 	"github.com/lidaqi001/micro/plugins/wrapper/trace/jaeger"
 	"github.com/opentracing/opentracing-go"
 	"io"
@@ -119,7 +120,7 @@ func (c *client) run() (interface{}, error) {
 		// 链路追踪客户端
 		micro.WrapClient(traceplugin.NewClientWrapper(trace)),
 		// 自定义客户端中间件
-		//micro.WrapClient(log.LogWrap),
+		micro.WrapClient(log.LogWrap),
 	)
 
 	// 初始化

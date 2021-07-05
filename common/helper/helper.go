@@ -1,8 +1,11 @@
 package helper
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 )
 
 /*******************************************************
@@ -46,4 +49,24 @@ func CreateDir(path string) error {
 func IsExist(f string) bool {
 	_, err := os.Stat(f)
 	return err == nil || os.IsExist(err)
+}
+
+// default : debug environment
+func IsOpenDebug() (bool, error) {
+
+	if debug := os.Getenv("DEBUG"); len(debug) > 0 {
+		val, err := strconv.ParseInt(debug, 10, 64)
+		if err != nil {
+			return false, errors.New(fmt.Sprintf("isOpenDebug.error:%v", err))
+		}
+
+		// production environment
+		if val == 0 {
+			return false, nil
+		}
+
+	}
+
+	// debug environment
+	return true, nil
 }

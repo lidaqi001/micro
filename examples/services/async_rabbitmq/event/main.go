@@ -12,7 +12,7 @@ func main() {
 
 	_ = service.Create(
 		service.Name(config.SERVICE_ASYNC_EVENT),
-		service.RabbitmqBroker(),
+		service.RabbitmqBroker(true),
 		service.CallFunc(func(service micro.Service) {
 
 			// 注册处理函数
