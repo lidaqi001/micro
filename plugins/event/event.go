@@ -8,7 +8,6 @@ import (
 	"github.com/asim/go-micro/v3/client"
 	"github.com/asim/go-micro/v3/logger"
 	"github.com/asim/go-micro/v3/server"
-	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/broker/rabbitmq"
 	"github.com/streadway/amqp"
@@ -24,7 +23,7 @@ type New struct {
 
 func init() {
 	// 设置rabbitmq地址
-	rabbitmq.DefaultRabbitURL = helper.GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
+	rabbitmq.DefaultRabbitURL = helper.GetRabbitmqAddress()
 }
 
 // 事件订阅

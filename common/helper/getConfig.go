@@ -28,6 +28,11 @@ func GetQPS() (float64, int64) {
 	return qpsf, qpsi
 }
 
+// 获取rabbitmq地址
+func GetRabbitmqAddress() string {
+	return GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
+}
+
 func GetConfig(envK string, defaultK string) string {
 	env := os.Getenv(envK)
 	if len(env) == 0 {

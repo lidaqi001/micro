@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/api/jwt"
 	"github.com/lidaqi001/micro/plugins/api/middleware"
 	_ "github.com/spf13/viper/remote"
@@ -49,6 +50,18 @@ func (a *api) init(opts ...Option) error {
 }
 
 func (a *api) run() error {
+
+	// set gin mode
+	v, err := helper.IsOpenDebug()
+	if err == nil {
+		if v {
+			gin.SetMode(gin.DebugMode)
+		} else {
+			gin.SetMode(gin.ReleaseMode)
+		}
+	} else {
+		return err
+	}
 
 	g := gin.Default()
 

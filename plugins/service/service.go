@@ -12,7 +12,6 @@ import (
 	"github.com/asim/go-micro/v3/server"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/ratelimit"
-	"github.com/lidaqi001/micro/common/config"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/broker/rabbitmq"
 	"github.com/lidaqi001/micro/plugins/logger"
@@ -101,7 +100,7 @@ func (s *service) Init(opts ...Option) error {
 
 	// set rabbitmq
 	if s.opts.Rabbitmq == true {
-		rabbitmq.DefaultRabbitURL = helper.GetConfig("RABBITMQ_ADDR", config.RABBITMQ_ADDR)
+		rabbitmq.DefaultRabbitURL = helper.GetRabbitmqAddress()
 		s.opts.Init = append(
 			s.opts.Init, micro.Broker(
 				// 设置 rabbitmq 为 broker 驱动
@@ -148,9 +147,7 @@ func (s *service) lnitializeHttp() error {
 		return err
 	}
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(gin.Recovery())
+	router := gin.Default()
 
 	// bind route for http server
 	s.opts.BindRoute(router)
