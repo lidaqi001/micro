@@ -11,8 +11,10 @@ import (
 
 func main() {
 	var err error
-	//os.Setenv("REGISTRY_ADDR", "etcd1.shan-service.svc.cluster.local:2379")
-	//v, err = config2.LoadConfigFromEtcd()
+	//os.Setenv("REGISTRY_USER","sxx-readw")
+	//os.Setenv("REGISTRY_PASS","123456")
+	//os.Setenv("REGISTRY_ADDR", "etcd.shan-service.svc.cluster.local:2379")
+	//v, err := config2.LoadConfigFromEtcd()
 	//if err != nil {
 	//	fmt.Println(err)
 	//}
@@ -20,6 +22,7 @@ func main() {
 
 	err = service.Create(
 		service.Name(config.SERVICE_SPEAK),
+		// 服务注册发现地址
 		//service.Advertise("127.0.0.1:9207"),
 		service.CallFunc(func(service micro.Service) {
 			// 注册处理函数

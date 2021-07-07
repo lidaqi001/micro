@@ -4,10 +4,8 @@ import (
 	"context"
 	_hystrix "github.com/afex/hystrix-go/hystrix"
 	"github.com/asim/go-micro/plugins/client/grpc/v3"
-	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/registry"
 	"github.com/lidaqi001/micro/common/helper"
 	"github.com/lidaqi001/micro/plugins/logger"
 	"github.com/lidaqi001/micro/plugins/wrapper/breaker/hystrix"
@@ -112,9 +110,7 @@ func (c *client) run() (interface{}, error) {
 		// 客户端名称
 		micro.Name(name),
 		// 服务发现
-		micro.Registry(etcd.NewRegistry(
-			registry.Addrs(helper.GetRegistryAddress()),
-		)),
+		micro.Registry(helper.GetRegistry()),
 		// 使用 hystrix 实现服务治理
 		micro.WrapClient(hystrix.NewClientWrapper()),
 		// 链路追踪客户端

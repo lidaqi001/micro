@@ -1,6 +1,8 @@
 package helper
 
 import (
+	"github.com/asim/go-micro/plugins/registry/etcd/v3"
+	"github.com/asim/go-micro/v3/registry"
 	"github.com/lidaqi001/micro/common/config"
 	"os"
 	"strconv"
@@ -10,9 +12,19 @@ import (
 						获取配置
 *******************************************************/
 
-// 获取注册中心地址
 func GetRegistryAddress() string {
 	return GetConfig("REGISTRY_ADDR", config.REGISTRY_ADDR)
+}
+
+// 获取注册中心地址
+func GetRegistry() registry.Registry {
+	addr := GetRegistryAddress()
+	user := GetConfig("REGISTRY_USER", "")
+	pass := GetConfig("REGISTRY_PASS", "")
+	return etcd.NewRegistry(
+		registry.Addrs(addr),
+		etcd.Auth(user, pass),
+	)
 }
 
 // 获取链路追踪地址

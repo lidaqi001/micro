@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/asim/go-micro/v3"
 	"github.com/lidaqi001/micro/common/config"
-	"github.com/lidaqi001/micro/examples/services/current_async_rabbitmq/subscriber/handler"
+	"github.com/lidaqi001/micro/examples/services/async_rabbitmq/subscriber/handler"
 	"github.com/lidaqi001/micro/plugins/event"
 	"github.com/lidaqi001/micro/plugins/service"
 )
@@ -12,6 +12,7 @@ func main() {
 
 	_ = service.Create(
 		service.Name(config.SERVICE_ASYNC_SUBSCRIBER),
+		service.Address(":8091"),
 		service.RabbitmqBroker(true),
 		service.CallFunc(func(service micro.Service) {
 
@@ -35,6 +36,9 @@ func main() {
 			_ = e.Subscribe(config.EVENT_B, config.QUEUE_C, handler.CallSing)
 
 			/**
+
+			！！！不使用该方法，列出来只是为了了解！！！
+
 			不指定队列（不使用，会导致消息数据丢失）
 
 			每次运行订阅服务，默认会分配一个随机队列

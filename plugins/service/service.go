@@ -2,13 +2,11 @@ package service
 
 import (
 	"context"
-	"github.com/asim/go-micro/plugins/registry/etcd/v3"
 	"github.com/asim/go-micro/plugins/server/grpc/v3"
 	httpServer "github.com/asim/go-micro/plugins/server/http/v3"
 	ratelimiter "github.com/asim/go-micro/plugins/wrapper/ratelimiter/ratelimit/v3"
 	traceplugin "github.com/asim/go-micro/plugins/wrapper/trace/opentracing/v3"
 	"github.com/asim/go-micro/v3"
-	"github.com/asim/go-micro/v3/registry"
 	"github.com/asim/go-micro/v3/server"
 	"github.com/gin-gonic/gin"
 	"github.com/juju/ratelimit"
@@ -185,7 +183,7 @@ func (s *service) run() error {
 		// 服务注册
 		micro.RegisterTTL(time.Second*30),      // 注册存活时间30s
 		micro.RegisterInterval(time.Second*20), // 刷新服务存活时间的间隔时间（保持注册存活时间）
-		micro.Registry(etcd.NewRegistry(registry.Addrs(helper.GetRegistryAddress()))),
+		micro.Registry(helper.GetRegistry()),
 		// wrap handler
 		micro.WrapHandler(
 			// 基于ratelimit 限流
